@@ -3,8 +3,11 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'altis.db');
-const IMAGES_ROOT = path.join(__dirname, '..', 'images');
+const DATA_ROOT = process.env.DATA_ROOT || path.join(__dirname, '..', 'data');
+const DB_PATH = process.env.DB_PATH || path.join(DATA_ROOT, 'altis.db');
+const IMAGES_ROOT = process.env.IMAGES_ROOT || path.join(__dirname, '..', 'images');
+
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');

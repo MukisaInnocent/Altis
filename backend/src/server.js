@@ -12,13 +12,17 @@ const { signToken, requireAuth } = require('./auth');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || true }));
 app.use(express.json());
 
 syncImagesFromDisk();
 
 // Serve the actual image files straight from their category folders.
 app.use('/images', express.static(IMAGES_ROOT, { maxAge: '7d' }));
+
+app.get('/health', (req, res) => {
+  res.json({ ok: true });
+});
 
 const VALID_CATEGORIES = fs.readdirSync(IMAGES_ROOT, { withFileTypes: true })
   .filter((d) => d.isDirectory())
