@@ -17,11 +17,6 @@ services:
         sync: false
       - key: CLIENT_ORIGIN
         sync: false
-    disk:
-      name: altis-voyage-data
-      mountPath: /opt/render/project/src/backend/data
-      sizeGB: 1
-
   - type: web
     name: altis-voyage-frontend
     runtime: static

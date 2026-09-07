@@ -11,11 +11,23 @@ const { signToken, requireAuth } = require('./auth');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || true }));
 app.use(express.json());
 
 syncImagesFromDisk();
+
+app.get('/images/slot/:slot', (req, res) => {
+  const row = db.prepare('SELECT category, filename FROM images WHERE slot = ? AND active = 1').get(req.params.slot);
+  const fallback = String(req.query.fallback || '');
+  const fallbackPath = /^((hero|about|destinations|tours)\/[a-zA-Z0-9._-]+|gallery\/[a-zA-Z0-9._-]+)$/.test(fallback)
+    ? path.join(IMAGES_ROOT, fallback)
+    : null;
+  const filePath = row ? path.join(IMAGES_ROOT, row.category, row.filename) : fallbackPath;
+  if (!filePath || !fs.existsSync(filePath)) return res.status(404).end();
+  res.sendFile(filePath);
+});
 
 // Serve the actual image files straight from their category folders.
 app.use('/images', express.static(IMAGES_ROOT, { maxAge: '7d' }));
@@ -27,6 +39,15 @@ app.get('/health', (req, res) => {
 const VALID_CATEGORIES = fs.readdirSync(IMAGES_ROOT, { withFileTypes: true })
   .filter((d) => d.isDirectory())
   .map((d) => d.name);
+
+function inferSlot(category, filename) {
+  const name = path.basename(filename, path.extname(filename)).toLowerCase();
+  if (category === 'hero') return name === 'sunset-savanna' ? 'hero-secondary' : 'hero';
+  if (category === 'about') return 'about';
+  if (category === 'destinations' && ['bwindi', 'queen-elizabeth', 'jinja', 'ssese-islands'].includes(name)) return `destination:${name}`;
+  if (category === 'tours' && ['gorilla-trek', 'nile-adventure', 'savanna-safari'].includes(name)) return `tour:${name}`;
+  return null;
+}
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -64,14 +85,17 @@ const legacyUpload = multer({
 app.get('/api/images', (req, res) => {
   syncImagesFromDisk();
   const rows = db
-    .prepare('SELECT id, category, filename, caption FROM images WHERE active = 1 ORDER BY category, sort_order, id')
+    .prepare('SELECT id, category, filename, caption, slot FROM images WHERE active = 1 ORDER BY category, sort_order, id')
     .all();
   const grouped = {};
+  const slots = {};
   for (const r of rows) {
     grouped[r.category] = grouped[r.category] || [];
-    grouped[r.category].push({ id: r.id, url: `/images/${r.category}/${r.filename}`, caption: r.caption });
+    const image = { id: r.id, url: `/images/${r.category}/${r.filename}`, caption: r.caption, slot: r.slot };
+    grouped[r.category].push(image);
+    if (r.slot) slots[r.slot] = image;
   }
-  res.json(grouped);
+  res.json({ ...grouped, slots });
 });
 
 // ---------- Public: inquiries ----------
@@ -136,14 +160,16 @@ app.post('/api/admin/images', requireAuth, legacyUpload.single('image'), (req, r
   }
   const safe = req.file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '-').toLowerCase();
   const filename = `${Date.now()}-${safe}`;
+  const slot = (req.body.slot || '').trim() || inferSlot(category, req.file.originalname);
+  if (slot) db.prepare('UPDATE images SET active = 0 WHERE category = ? AND slot = ?').run(category, slot);
   fs.writeFileSync(path.join(IMAGES_ROOT, category, filename), req.file.buffer);
   const maxOrder = db
     .prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM images WHERE category = ?')
     .get(category).m;
   const info = db
-    .prepare('INSERT INTO images (category, filename, active, sort_order, caption) VALUES (?, ?, 1, ?, ?)')
-    .run(category, filename, maxOrder + 1, req.body.caption || '');
-  res.status(201).json({ id: info.lastInsertRowid, url: `/images/${category}/${filename}` });
+    .prepare('INSERT INTO images (category, filename, active, sort_order, caption, slot) VALUES (?, ?, 1, ?, ?, ?)')
+    .run(category, filename, maxOrder + 1, req.body.caption || '', slot);
+  res.status(201).json({ id: info.lastInsertRowid, url: `/images/${category}/${filename}`, slot });
 });
 
 app.patch('/api/admin/images/:id/toggle', requireAuth, (req, res) => {
@@ -165,13 +191,15 @@ app.delete('/api/admin/images/:id', requireAuth, (req, res) => {
 app.post('/api/admin/images/:category', requireAuth, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No image uploaded.' });
   const category = req.params.category;
+  const slot = (req.body.slot || '').trim() || inferSlot(category, req.file.originalname);
+  if (slot) db.prepare('UPDATE images SET active = 0 WHERE category = ? AND slot = ?').run(category, slot);
   const maxOrder = db
     .prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM images WHERE category = ?')
     .get(category).m;
   const info = db
-    .prepare('INSERT INTO images (category, filename, active, sort_order, caption) VALUES (?, ?, 1, ?, ?)')
-    .run(category, req.file.filename, maxOrder + 1, req.body.caption || '');
-  res.status(201).json({ id: info.lastInsertRowid, url: `/images/${category}/${req.file.filename}` });
+    .prepare('INSERT INTO images (category, filename, active, sort_order, caption, slot) VALUES (?, ?, 1, ?, ?, ?)')
+    .run(category, req.file.filename, maxOrder + 1, req.body.caption || '', slot);
+  res.status(201).json({ id: info.lastInsertRowid, url: `/images/${category}/${req.file.filename}`, slot });
 });
 
 // ---------- Admin: inquiries + stats dashboard ----------
@@ -194,6 +222,6 @@ app.get('/api/admin/stats', requireAuth, (req, res) => {
   res.json({ totalInquiries, unreadInquiries, totalImages, activeImages, recentEvents });
 });
 
-app.listen(PORT, () => {
-  console.log(`Altis Voyage backend running on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Altis Voyage backend running on http://${HOST}:${PORT}`);
 });

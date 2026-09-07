@@ -49,6 +49,10 @@ CREATE TABLE IF NOT EXISTS stats (
 );
 `);
 
+// Add slot support to databases created before image replacement was added.
+const imageColumns = db.prepare('PRAGMA table_info(images)').all().map((column) => column.name);
+if (!imageColumns.includes('slot')) db.exec('ALTER TABLE images ADD COLUMN slot TEXT DEFAULT NULL');
+
 // Seed a default admin account if none exists (change on first login).
 const adminCount = db.prepare('SELECT COUNT(*) AS c FROM admins').get().c;
 if (adminCount === 0) {
@@ -85,6 +89,11 @@ function syncImagesFromDisk() {
         insert.run(category, filename, idx);
       }
     });
+
+    const hasActive = db.prepare('SELECT 1 FROM images WHERE category = ? AND active = 1 LIMIT 1').get(category);
+    if (!hasActive && files.length) {
+      db.prepare('UPDATE images SET active = 1 WHERE category = ?').run(category);
+    }
   }
 
   // Remove DB rows whose file no longer exists on disk.

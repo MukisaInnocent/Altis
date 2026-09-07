@@ -6,6 +6,6 @@
     </linearGradient>
   </defs>
   <rect width="1600" height="900" fill="url(#g0)"/>
-  <text x="800" y="450" fill="rgba(255,255,255,0.92)" font-family="Georgia, serif" font-size="89" text-anchor="middle" dominant-baseline="middle">Murchison Falls, Uganda</text>
-  <text x="24" y="876" fill="rgba(255,255,255,0.55)" font-family="Arial, sans-serif" font-size="36">Placeholder — replace with client photo</text>
+  <circle cx="1170" cy="300" r="130" fill="#edc56a" opacity=".34"/>
+  <path d="M0 720 C300 610 520 760 820 680 S1260 610 1600 710 V900 H0Z" fill="#06172d" opacity=".36"/>
 </svg>

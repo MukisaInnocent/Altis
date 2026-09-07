@@ -6,6 +6,6 @@
     </linearGradient>
   </defs>
   <rect width="1600" height="900" fill="url(#g1)"/>
-  <text x="800" y="450" fill="rgba(255,255,255,0.92)" font-family="Georgia, serif" font-size="89" text-anchor="middle" dominant-baseline="middle">Lake Bunyonyi</text>
-  <text x="24" y="876" fill="rgba(255,255,255,0.55)" font-family="Arial, sans-serif" font-size="36">Placeholder — replace with client photo</text>
+  <path d="M0 680 C260 560 470 760 720 650 S1180 560 1600 680 V900 H0Z" fill="#06172d" opacity=".28"/>
+  <path d="M0 760 C250 660 490 820 780 720 S1240 650 1600 760" fill="none" stroke="#edc56a" stroke-opacity=".34" stroke-width="2"/>
 </svg>
