@@ -19,10 +19,12 @@ Hostinger's Node.js application feature must be available on the selected hostin
 3. Install dependencies from the backend directory:
 
    ```bash
-   npm ci --omit=dev
+   npm ci --omit=dev --loglevel=error
    ```
 
    The backend pins `better-sqlite3` to a release with Linux prebuilt binaries for the supported Node versions. This avoids Hostinger's unavailable Python/node-gyp compiler path. npm may print a `prebuild-install@7.1.3` deprecation warning because that package is a transitive dependency of `better-sqlite3`; it is non-fatal and there is no newer maintained drop-in release to install separately.
+
+   The backend includes `.npmrc` with `loglevel=error`, so Hostinger will still show real installation failures while ignoring non-fatal deprecation notices.
 
    Do not upgrade to `better-sqlite3` 13 just to remove that warning. Its install path uses native compilation and can bring back the original missing-Python failure.
 
