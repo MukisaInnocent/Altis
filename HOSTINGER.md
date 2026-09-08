@@ -53,6 +53,33 @@ Hostinger's Node.js application feature must be available on the selected hostin
 
 The backend writes SQLite data and admin-uploaded images to the configured paths. Those paths must be writable by the Node application user and must not be inside a temporary deployment directory.
 
+### If Hostinger still reports a failed build
+
+The `prebuild-install` deprecation message is only a warning. These lines confirm that dependency installation succeeded:
+
+```text
+added 130 packages
+found 0 vulnerabilities
+```
+
+If the application is still marked failed, inspect the next log section for the startup error. Confirm the Node.js application settings are:
+
+- Application root: the uploaded `backend` directory
+- Startup file: `src/server.js`
+- Node version: 20.x or 22.x
+- Build command: `npm ci --omit=dev`
+- `PORT`: unset, so Hostinger can inject its assigned port
+- `HOST`: `0.0.0.0`
+
+From the Hostinger terminal, run this from the application root:
+
+```bash
+node -e "const db=require('better-sqlite3'); const x=new db(':memory:'); console.log(x.prepare('select sqlite_version() v').get())"
+npm start
+```
+
+The first command must print a SQLite version. The second should print the Altis Voyage backend startup message. If either command fails, copy the error after the npm installation summary; the installation warnings themselves are not the cause.
+
 ## 2. Build the frontend
 
 Before building, create `frontend/.env.production` with the public API URL and no trailing slash:
