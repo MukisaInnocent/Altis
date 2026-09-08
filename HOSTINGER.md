@@ -11,7 +11,7 @@ Hostinger's Node.js application feature must be available on the selected hostin
 
 1. Upload the `backend` directory to a private folder outside `public_html`, for example `~/apps/altis-voyage-backend`.
 2. In hPanel, open **Advanced > Node.js** and create an application with:
-   - **Node version:** 20.x (recommended; do not use Node 22 for this backend)
+   - **Node version:** 20.x or 22.x
    - **Application mode:** Production
    - **Application root:** the uploaded `backend` directory
    - **Application startup file:** `src/server.js`
@@ -22,9 +22,9 @@ Hostinger's Node.js application feature must be available on the selected hostin
    npm ci --omit=dev
    ```
 
-   The backend pins `better-sqlite3` to a release with Node 20 Linux prebuilt binaries. This avoids Hostinger's unavailable Python/node-gyp compiler path.
+   The backend pins `better-sqlite3` to a release with Linux prebuilt binaries for the supported Node versions. This avoids Hostinger's unavailable Python/node-gyp compiler path.
 
-   If a previous Node 22 deployment already failed, change the Hostinger application to Node 20, remove the failed build or cached `node_modules` when the panel offers that option, and deploy again. Do not run `npm rebuild better-sqlite3` on this shared environment; that deliberately invokes the Python-based compiler that produced the error.
+   If a previous deployment failed, remove the failed build or cached `node_modules` when the panel offers that option, and deploy again. Do not run `npm rebuild better-sqlite3` on this shared environment; that deliberately invokes the Python-based compiler that produced the original error.
 
 4. Add these environment variables in the Node.js application settings. Replace every placeholder:
 
