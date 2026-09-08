@@ -14,7 +14,7 @@ Hostinger's Node.js application feature must be available on the selected hostin
    - **Node version:** 20.x or 22.x
    - **Application mode:** Production
    - **Application root:** the uploaded `backend` directory
-   - **Application startup file:** `src/server.js`
+   - **Application startup file:** `src/server.js` (exactly; do not use `index.js`)
    - **Application URL:** an API subdomain such as `https://api.example.com`
 3. Install dependencies from the backend directory:
 
@@ -68,8 +68,8 @@ found 0 vulnerabilities
 
 If the application is still marked failed, inspect the next log section for the startup error. Confirm the Node.js application settings are:
 
-- Application root: the uploaded `backend` directory
-- Startup file: `src/server.js`
+   - Application root: the uploaded `backend` directory
+   - Startup file: `src/server.js` (exactly; do not use `index.js`)
 - Node version: 20.x or 22.x
 - Build command: `npm ci --omit=dev`
 - `PORT`: unset, so Hostinger can inject its assigned port
