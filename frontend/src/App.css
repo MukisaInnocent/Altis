@@ -199,6 +199,19 @@ a { color: inherit; }
 .platform { min-height: 100vh; background: var(--ivory); }
 .platform-nav { position: sticky; top: 0; z-index: 10; height: 78px; padding: 0 max(22px, calc((100vw - 1280px) / 2)); display: flex; align-items: center; justify-content: space-between; background: rgba(6,23,45,.97); color: #fff; box-shadow: 0 8px 24px rgba(6,23,45,.12); }
 .platform-nav .brand img { width: 132px; }
+.nav-tools { display: flex; align-items: center; gap: 12px; }
+.travel-search { position: relative; display: flex; align-items: center; gap: 8px; width: min(320px, 38vw); padding: 10px 12px; color: #fff; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); }
+.travel-search svg { color: rgba(255,255,255,.72); }
+.travel-search input { width: 100%; color: #fff; background: transparent; border: 0; outline: 0; font-size: 12px; }
+.travel-search input::placeholder { color: rgba(255,255,255,.6); }
+.search-results { position: absolute; top: calc(100% + 10px); left: 0; right: 0; display: none; background: #fff; border: 1px solid var(--line); box-shadow: 0 18px 34px rgba(6,23,45,.12); }
+.search-results.open { display: grid; }
+.search-results a { display: grid; gap: 4px; padding: 12px 14px; text-decoration: none; border-bottom: 1px solid var(--line); }
+.search-results a:last-child { border-bottom: 0; }
+.search-results span { color: var(--gold); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+.search-results strong { color: var(--navy); font-size: 14px; }
+.search-results small { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.search-empty { padding: 14px; color: var(--muted); font-size: 12px; }
 .platform-links { display: flex; align-items: center; gap: 21px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 .platform-links a { display: inline-flex; align-items: center; gap: 7px; color: rgba(255,255,255,.86); text-decoration: none; }
 .platform-links a:hover { color: var(--gold-light); }
@@ -230,6 +243,19 @@ a { color: inherit; }
 .platform-home-hero h1 { color: #fff; }
 .platform-home-hero h1 em { color: var(--gold-light); font-style: normal; }
 .platform-home-hero p:not(.eyebrow) { max-width: 500px; color: rgba(255,255,255,.78); font-size: 17px; line-height: 1.7; }
+.ai-guide-panel { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 22px; max-width: 1280px; margin: auto; padding: 34px max(24px, 5vw); background: linear-gradient(135deg, rgba(6,23,45,.98), rgba(11,39,69,.95)); color: #fff; }
+.ai-guide-panel h2 { margin: 12px 0 12px; color: #fff; font: 500 clamp(28px, 3vw, 46px)/1.1 var(--serif); }
+.ai-guide-panel p { margin: 0; color: rgba(255,255,255,.72); line-height: 1.75; }
+.ai-guide-copy { max-width: 470px; }
+.ai-guide-steps { display: grid; gap: 16px; }
+.ai-guide-steps div { padding: 18px 18px 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12); }
+.ai-guide-steps span { display: inline-block; margin-bottom: 12px; color: var(--gold-light); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.ai-guide-steps strong { display: block; margin-bottom: 6px; color: #fff; font-size: 15px; }
+.ai-guide-steps p { font-size: 12px; }
+.chat-preview { display: grid; gap: 12px; align-content: center; }
+.chat-bubble { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-radius: 14px; font-size: 12px; line-height: 1.5; }
+.chat-bubble.user { background: rgba(214,164,59,.15); border: 1px solid rgba(214,164,59,.3); color: #fff; }
+.chat-bubble.assistant { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.82); }
 .quick-services { display: grid; grid-template-columns: 1.1fr repeat(6, 1fr); align-items: center; gap: 14px; max-width: 1280px; margin: auto; padding: 22px max(24px, 5vw); background: var(--gold); }
 .quick-services .tag { color: var(--navy); }
 .quick-services a { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--navy); font-size: 11px; font-weight: 700; text-decoration: none; }
@@ -277,6 +303,11 @@ a { color: inherit; }
 .placeholder-panel span { color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .placeholder-panel h3 { margin: 18px 0 8px; color: var(--navy); font: 28px var(--serif); }
 .placeholder-panel p, .content-note, .notice { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.experience-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.experience-grid article { padding: 26px 22px; background: var(--white); border: 1px solid var(--line); }
+.experience-grid span { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.experience-grid h3 { margin: 18px 0 10px; font: 500 26px var(--serif); color: var(--navy); }
+.experience-grid p { margin: 0; color: var(--muted); line-height: 1.7; font-size: 14px; }
 .benefit-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .benefit-list div { display: flex; align-items: center; gap: 9px; padding: 16px; color: var(--navy); background: var(--white); font-size: 13px; }
 .benefit-list svg { color: var(--ocean); }
@@ -315,9 +346,9 @@ a { color: inherit; }
 .footer-bottom a { color: inherit; text-decoration: none; }
 @media (max-width: 1050px) { .platform-links { gap: 13px; font-size: 10px; } .quick-services { grid-template-columns: repeat(3, 1fr); } .quick-services .tag { grid-column: 1 / -1; } .service-grid { grid-template-columns: repeat(2, 1fr); } .resource-grid { grid-template-columns: repeat(2, 1fr); } .footer-main { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 700px) {
-  .platform-nav { height: 72px; padding: 0 20px; } .platform-nav .brand img { width: 122px; } .platform-menu { display: block; } .platform-links { display: none; } .platform-links.open { position: absolute; top: 72px; left: 0; right: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; padding: 24px 20px 28px; background: var(--navy); }
+  .platform-nav { height: 72px; padding: 0 20px; } .platform-nav .brand img { width: 122px; } .nav-tools { width: 100%; justify-content: flex-end; } .platform-menu { display: block; } .travel-search { width: 180px; } .platform-links { display: none; } .platform-links.open { position: absolute; top: 72px; left: 0; right: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; padding: 24px 20px 28px; background: var(--navy); }
   .platform-hero { min-height: 440px; padding: 85px 20px 65px; } .platform-home-hero { min-height: 620px; padding: 90px 20px 60px; } .platform-hero h1, .platform-home-hero h1 { font-size: 54px; } .platform-section { padding: 72px 20px; } .platform-card-grid { grid-template-columns: 1fr; } .platform-card > img { height: 230px; } .platform-gallery { grid-template-columns: 1fr 1fr; grid-auto-rows: 145px; } .platform-gallery button:nth-child(3n + 1) { grid-row: span 1; }
-  .quick-services { grid-template-columns: 1fr 1fr; padding: 20px; } .quick-services .tag { grid-column: 1 / -1; } .section-heading, .platform-cta { display: block; } .section-heading .inline, .section-heading .whatsapp-cta { margin-top: 22px; } .platform-cta > div:last-child { margin-top: 25px; flex-wrap: wrap; }
+  .ai-guide-panel { grid-template-columns: 1fr; padding: 26px 20px; } .quick-services { grid-template-columns: 1fr 1fr; padding: 20px; } .quick-services .tag { grid-column: 1 / -1; } .section-heading, .platform-cta { display: block; } .section-heading .inline, .section-heading .whatsapp-cta { margin-top: 22px; } .platform-cta > div:last-child { margin-top: 25px; flex-wrap: wrap; }
   .intro-platform, .split-copy, .contact-platform { display: block; } .split-copy > div + div, .contact-platform > form { margin-top: 40px; } .service-grid, .resource-grid { grid-template-columns: 1fr; } .travel-enquiry { grid-template-columns: 1fr; padding: 24px; } .travel-enquiry .full, .form-heading { grid-column: auto; } .form-heading h2 { font-size: 34px; } .benefit-list { grid-template-columns: 1fr; } .enquiry-success > div { flex-direction: column; align-items: center; }
   .footer-main { grid-template-columns: 1fr; padding: 48px 20px; } .footer-bottom { display: block; padding: 18px 20px; line-height: 1.8; } .footer-bottom span + span { display: block; } .contact-details h2 { font-size: 38px; }
 }

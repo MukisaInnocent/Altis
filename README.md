@@ -191,3 +191,7 @@ The important order is:
 4. Redeploy the frontend because Vite embeds environment values during its build.
 
 Free Render services can sleep and free-tier storage is not durable. This deployment is for testing until persistent database and image storage are added.
+
+## Hostinger deployment
+
+For production hosting on Hostinger, deploy the frontend static build to `public_html` and run the Express API as a Hostinger Node.js application on an API subdomain. Follow [HOSTINGER.md](HOSTINGER.md) for the required environment variables, build command, Apache SPA rewrite, and verification steps.
