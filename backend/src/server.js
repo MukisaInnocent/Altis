@@ -234,7 +234,9 @@ app.get('/api/admin/stats', requireAuth, (req, res) => {
 if (fs.existsSync(STATIC_ROOT)) {
   app.use(express.static(STATIC_ROOT, { maxAge: '7d' }));
   // SPA fallback: send index.html for any route not matched above.
-  app.get('*', (req, res) => {
+  // Express 5 uses path-to-regexp v8, where a wildcard must be named.
+  // This form also matches the site root, so SPA routes such as /admin work.
+  app.get('/{*splat}', (req, res) => {
     res.sendFile(path.join(STATIC_ROOT, 'index.html'));
   });
   console.log(`[static] Serving frontend from: ${STATIC_ROOT}`);
