@@ -3,6 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+
+// Path to the built React frontend. Override with STATIC_ROOT env var if needed.
+const STATIC_ROOT = process.env.STATIC_ROOT ||
+  path.join(__dirname, '..', '..', 'frontend', 'dist');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 
@@ -221,6 +225,20 @@ app.get('/api/admin/stats', requireAuth, (req, res) => {
   const recentEvents = db.prepare('SELECT event, COUNT(*) AS c FROM stats GROUP BY event ORDER BY c DESC').all();
   res.json({ totalInquiries, unreadInquiries, totalImages, activeImages, recentEvents });
 });
+
+// ---------- Serve built React frontend (SPA) ----------
+// Must come AFTER all API routes so /api/* routes are matched first.
+if (fs.existsSync(STATIC_ROOT)) {
+  app.use(express.static(STATIC_ROOT, { maxAge: '7d' }));
+  // SPA fallback: send index.html for any route not matched above.
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(STATIC_ROOT, 'index.html'));
+  });
+  console.log(`[static] Serving frontend from: ${STATIC_ROOT}`);
+} else {
+  console.warn(`[static] Frontend dist not found at: ${STATIC_ROOT}`);
+  console.warn('[static] Run: cd frontend && npm ci && npm run build');
+}
 
 app.listen(PORT, HOST, () => {
   console.log(`Altis Voyage backend running on http://${HOST}:${PORT}`);

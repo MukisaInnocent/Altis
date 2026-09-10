@@ -1,8 +1,8 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { ArrowRight, Bot, Check, ChevronDown, Mail, MapPin, Menu, MessageCircle, Phone, Search, Sparkles, X } from 'lucide-react'
 
-const API = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:4000`
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:4000` : '')
 const whatsapp = 'https://wa.me/256774497295'
 const phone = '+256 788 748 128 / +256 756 037 524'
 const services = [

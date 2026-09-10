@@ -3,7 +3,7 @@ import { Link, Route, Routes, useNavigate } from 'react-router-dom'
 import { ArrowRight, Check, ChevronLeft, ChevronRight, Clock3, Eye, Camera, LogOut, Mail, Menu, MessageCircle, Sparkles, Trash2, Upload, X } from 'lucide-react'
 import './App.css'
 import PlatformApp from './PublicExperience'
-const API = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:4000`
+const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:4000` : '')
 const nav = [['About','/about'],['Services','/services'],['Tours','/tours'],['Gallery','/gallery'],['Contact','/contact']]
 const places = [['Bwindi','Misty rainforest, ancient trails, and the rare privilege of meeting mountain gorillas.'],['Queen Elizabeth','Open savanna, crater lakes, and tree-climbing lions along the Kazinga Channel.'],['Jinja','The source of the Nile is a playground for river days, rapids, and slow sunsets.'],['Ssese Islands','Palm-fringed beaches and quiet lake air, reached by a beautiful ferry crossing.']]
 const packages = [['Gorilla Trek','5 days','A considered journey into Bwindi with expert local guides and time to breathe.','gorilla-trek.svg'],['Nile Source Adventure','4 days','White water, warm evenings, and the wild pulse of the Nile at its source.','nile-adventure.svg'],['Classic Savanna Safari','6 days','A generous loop through Uganda’s great parks, made for curious travelers.','savanna-safari.svg']]

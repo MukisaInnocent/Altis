@@ -1,98 +1,58 @@
-# Hostinger deployment
+# Hostinger deployment — Single service (backend serves frontend)
 
-This project is deployed as two Hostinger services:
+The app runs as a **single Node.js service** at `altistravels.com`.
+The Express backend serves the built React frontend as static files,
+so you only need one Hostinger Node.js application.
 
-- **Frontend:** Vite static build uploaded to the domain's `public_html` directory.
-- **Backend:** Express Node.js application created in Hostinger's Node.js App section, preferably on an API subdomain such as `api.example.com`.
-
-Hostinger's Node.js application feature must be available on the selected hosting plan. If it is not available, use a VPS or host the backend on a Node-compatible service.
+---
 
 ## 1. Deploy the backend
 
-1. Upload the `backend` directory to a private folder outside `public_html`, for example `~/apps/altis-voyage-backend`.
+1. Upload the entire repository root (or at minimum the `backend` and `frontend/dist` directories) to a private folder, for example `~/apps/altis-voyage`.
 2. In hPanel, open **Advanced > Node.js** and create an application with:
    - **Node version:** 20.x or 22.x
    - **Application mode:** Production
-   - **Application root:** the uploaded `backend` directory
-   - **Application startup file:** `src/server.js` (exactly; do not use `index.js`)
-   - **Application URL:** an API subdomain such as `https://api.example.com`
+   - **Application root:** `~/apps/altis-voyage/backend`
+   - **Application startup file:** `src/server.js`
+   - **Application URL:** `https://altistravels.com`
 3. Install dependencies from the backend directory:
 
    ```bash
    npm ci --omit=dev --loglevel=error
    ```
 
-   The backend pins `better-sqlite3` to a release with Linux prebuilt binaries for the supported Node versions. This avoids Hostinger's unavailable Python/node-gyp compiler path. npm may print a `prebuild-install@7.1.3` deprecation warning because that package is a transitive dependency of `better-sqlite3`; it is non-fatal and there is no newer maintained drop-in release to install separately.
-
-   The backend includes `.npmrc` with `loglevel=error`, so Hostinger will still show real installation failures while ignoring non-fatal deprecation notices.
-
-   Do not upgrade to `better-sqlite3` 13 just to remove that warning. Its install path uses native compilation and can bring back the original missing-Python failure.
-
-   If a previous deployment failed, remove the failed build or cached `node_modules` when the panel offers that option, and deploy again. Do not run `npm rebuild better-sqlite3` on this shared environment; that deliberately invokes the Python-based compiler that produced the original error.
-
-4. Add these environment variables in the Node.js application settings. Replace every placeholder:
+4. Add these environment variables in the Node.js application settings:
 
    ```env
    NODE_ENV=production
-   PORT=         # Let Hostinger provide PORT when the panel requires it.
    HOST=0.0.0.0
    JWT_SECRET=generate-a-long-random-secret
    ADMIN_USER=choose-an-admin-username
    ADMIN_PASS=choose-a-strong-password
-   CLIENT_ORIGIN=https://example.com
-   DATA_ROOT=/home/USERNAME/apps/altis-voyage-backend/data
-   IMAGES_ROOT=/home/USERNAME/apps/altis-voyage-backend/images
-   DB_PATH=/home/USERNAME/apps/altis-voyage-backend/data/altis.db
+   CLIENT_ORIGIN=https://altistravels.com
+   DATA_ROOT=/home/USERNAME/apps/altis-voyage/backend/data
+   IMAGES_ROOT=/home/USERNAME/apps/altis-voyage/backend/images
+   DB_PATH=/home/USERNAME/apps/altis-voyage/backend/data/altis.db
+   STATIC_ROOT=/home/USERNAME/apps/altis-voyage/frontend/dist
    ```
 
-   Leave `PORT` unset if Hostinger injects it automatically. Do not commit real secrets.
+   > Replace `USERNAME` with your actual Hostinger SSH username.
+   > Leave `PORT` unset — Hostinger injects it automatically.
 
 5. Restart the Node.js application and verify:
 
    ```text
-   https://api.example.com/health
+   https://altistravels.com/health   → {"ok":true}
+   https://altistravels.com          → React site loads
+   https://altistravels.com/admin    → Admin login page
    ```
 
-   It should return `{"ok":true}`.
+---
 
-The backend writes SQLite data and admin-uploaded images to the configured paths. Those paths must be writable by the Node application user and must not be inside a temporary deployment directory.
+## 2. Build the frontend locally
 
-### If Hostinger still reports a failed build
-
-The `prebuild-install` deprecation message is only a warning. These lines confirm that dependency installation succeeded:
-
-```text
-added 130 packages
-found 0 vulnerabilities
-```
-
-If the application is still marked failed, inspect the next log section for the startup error. Confirm the Node.js application settings are:
-
-   - Application root: the uploaded `backend` directory
-   - Startup file: `src/server.js` (exactly; do not use `index.js`)
-- Node version: 20.x or 22.x
-- Build command: `npm ci --omit=dev`
-- `PORT`: unset, so Hostinger can inject its assigned port
-- `HOST`: `0.0.0.0`
-
-From the Hostinger terminal, run this from the application root:
-
-```bash
-node -e "const db=require('better-sqlite3'); const x=new db(':memory:'); console.log(x.prepare('select sqlite_version() v').get())"
-npm start
-```
-
-The first command must print a SQLite version. The second should print the Altis Voyage backend startup message. If either command fails, copy the error after the npm installation summary; the installation warnings themselves are not the cause.
-
-## 2. Build the frontend
-
-Before building, create `frontend/.env.production` with the public API URL and no trailing slash:
-
-```env
-VITE_API_URL=https://api.example.com
-```
-
-Then build locally:
+The frontend must be built **before uploading**, because `VITE_API_URL`
+is embedded at build time. With the single-service setup, leave it empty:
 
 ```powershell
 cd frontend
@@ -100,23 +60,57 @@ npm ci
 npm run build
 ```
 
-The build output is `frontend/dist`. The included `frontend/public/.htaccess` is copied into `dist` and keeps direct React routes working on Apache.
+The output is `frontend/dist`. Upload this entire folder to the server at
+the path set in `STATIC_ROOT` above.
 
-## 3. Upload the frontend
+---
 
-1. Back up any existing `public_html` contents.
-2. Upload the **contents** of `frontend/dist` into `public_html`, including the hidden `.htaccess` file.
-3. Point the main domain to `public_html`.
-4. Enable SSL for the main domain and API subdomain.
-5. Open the main domain, `/destinations`, `/admin`, and one direct destination URL to verify routing.
+## 3. Upload
+
+Upload to Hostinger via SSH, SFTP, or the File Manager:
+
+```text
+~/apps/altis-voyage/
+  backend/          ← Node.js app root (server.js, package.json, src/, data/, images/)
+  frontend/
+    dist/           ← Built React app (index.html, assets/, .htaccess, etc.)
+```
+
+> **Important:** The `.htaccess` file in `frontend/dist` is only needed when serving
+> via Apache. With the Node.js SPA fallback in `server.js`, it is not required —
+> but leaving it there does no harm.
+
+---
 
 ## 4. Final checks
 
-- `https://api.example.com/health` returns `{"ok":true}`.
-- Browser requests from the main domain reach `https://api.example.com` without CORS errors.
-- Submit a test enquiry and confirm it appears under `/admin`.
+- `https://altistravels.com/health` returns `{"ok":true}`.
+- `https://altistravels.com` shows the Altis Voyage React site.
+- `https://altistravels.com/admin` shows the admin login.
+- Submit a test enquiry and confirm it appears in the admin panel.
 - Change the admin password immediately after the first login.
-- Keep a backup of `data/altis.db` and the `images` directory.
-- Do not expose the backend directory through `public_html`.
+- Keep backups of `data/altis.db` and the `images/` directory.
 
-The Render files remain available for the existing test deployment; they are not required for Hostinger.
+---
+
+## Troubleshooting
+
+### Site shows "Cannot GET /"
+- The `STATIC_ROOT` env var path is wrong, or `frontend/dist` was not uploaded.
+- Check the Node.js app logs in hPanel.
+
+### API calls fail (CORS or 404)
+- Ensure `CLIENT_ORIGIN=https://altistravels.com` is set.
+- Check that `STATIC_ROOT` points to the correct `dist` folder.
+
+### better-sqlite3 install warning
+The `prebuild-install` deprecation warning is non-fatal. These lines confirm success:
+```
+added 130 packages
+found 0 vulnerabilities
+```
+
+### Node.js app still marked failed
+- Startup file must be exactly `src/server.js` (not `index.js`).
+- Node version must be 20.x or 22.x.
+- `PORT` must be **unset** so Hostinger injects it.
