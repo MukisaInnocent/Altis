@@ -20,7 +20,7 @@ services:
   - type: web
     name: altis-voyage-frontend
     runtime: static
-    rootDir: frontend
+    rootDir: backend/frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
     envVars:

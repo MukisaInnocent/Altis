@@ -8,7 +8,7 @@ so you only need one Hostinger Node.js application.
 
 ## 1. Deploy the backend
 
-1. Upload the entire repository root (or at minimum the `backend` and `frontend/dist` directories) to a private folder, for example `~/apps/altis-voyage`.
+1. Upload the entire repository root (or at minimum the `backend` directory) to a private folder, for example `~/apps/altis-voyage`.
 2. In hPanel, open **Advanced > Node.js** and create an application with:
    - **Node version:** 20.x or 22.x
    - **Application mode:** Production
@@ -33,7 +33,7 @@ so you only need one Hostinger Node.js application.
    DATA_ROOT=/home/USERNAME/apps/altis-voyage/backend/data
    IMAGES_ROOT=/home/USERNAME/apps/altis-voyage/backend/images
    DB_PATH=/home/USERNAME/apps/altis-voyage/backend/data/altis.db
-   STATIC_ROOT=/home/USERNAME/apps/altis-voyage/frontend/dist
+   STATIC_ROOT=/home/USERNAME/apps/altis-voyage/backend/frontend/dist
    ```
 
    > Replace `USERNAME` with your actual Hostinger SSH username.
@@ -55,12 +55,12 @@ The frontend must be built **before uploading**, because `VITE_API_URL`
 is embedded at build time. With the single-service setup, leave it empty:
 
 ```powershell
-cd frontend
+cd backend/frontend
 npm ci
 npm run build
 ```
 
-The output is `frontend/dist`. Upload this entire folder to the server at
+The output is `backend/frontend/dist`. Upload this entire folder to the server at
 the path set in `STATIC_ROOT` above.
 
 ---
@@ -72,11 +72,11 @@ Upload to Hostinger via SSH, SFTP, or the File Manager:
 ```text
 ~/apps/altis-voyage/
   backend/          ← Node.js app root (server.js, package.json, src/, data/, images/)
-  frontend/
-    dist/           ← Built React app (index.html, assets/, .htaccess, etc.)
+    frontend/
+      dist/           ← Built React app (index.html, assets/, .htaccess, etc.)
 ```
 
-> **Important:** The `.htaccess` file in `frontend/dist` is only needed when serving
+> **Important:** The `.htaccess` file in `backend/frontend/dist` is only needed when serving
 > via Apache. With the Node.js SPA fallback in `server.js`, it is not required —
 > but leaving it there does no harm.
 
@@ -96,7 +96,7 @@ Upload to Hostinger via SSH, SFTP, or the File Manager:
 ## Troubleshooting
 
 ### Site shows "Cannot GET /"
-- The `STATIC_ROOT` env var path is wrong, or `frontend/dist` was not uploaded.
+- The `STATIC_ROOT` env var path is wrong, or `backend/frontend/dist` was not uploaded.
 - Check the Node.js app logs in hPanel.
 
 ### API calls fail (CORS or 404)

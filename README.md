@@ -29,7 +29,7 @@ Install dependencies once in each application folder:
 cd "C:\Users\MUKISA\Music\Altis Voyage\backend"
 npm ci
 
-cd "C:\Users\MUKISA\Music\Altis Voyage\frontend"
+cd "C:\Users\MUKISA\Music\Altis Voyage\backend\frontend"
 npm ci
 ```
 
@@ -49,7 +49,7 @@ The API runs at `http://localhost:4000`.
 ### Terminal 2: frontend
 
 ```powershell
-cd "C:\Users\MUKISA\Music\Altis Voyage\frontend"
+cd "C:\Users\MUKISA\Music\Altis Voyage\backend\frontend"
 npm run dev
 ```
 
@@ -91,7 +91,7 @@ If the other device cannot connect, allow Node.js through Windows Defender Firew
 For a LAN production-style preview after building:
 
 ```powershell
-cd "C:\Users\MUKISA\Music\Altis Voyage\frontend"
+cd "C:\Users\MUKISA\Music\Altis Voyage\backend\frontend"
 npm run build
 npm run preview -- --host 0.0.0.0
 ```
@@ -117,7 +117,7 @@ CLIENT_ORIGIN=http://localhost:5173
 
 ### Frontend
 
-Copy `frontend/.env.example` to `frontend/.env` if you need to override the API URL:
+Copy `backend/frontend/.env.example` to `backend/frontend/.env` if you need to override the API URL:
 
 ```env
 VITE_API_URL=
@@ -152,21 +152,21 @@ The frontend uses `vite-plugin-pwa` with automatic service-worker updates. A pro
 Build and preview it locally:
 
 ```powershell
-cd "C:\Users\MUKISA\Music\Altis Voyage\frontend"
+cd "C:\Users\MUKISA\Music\Altis Voyage\backend\frontend"
 npm run build
 npm run preview -- --host 0.0.0.0
 ```
 
 PWA installation and service workers work reliably on HTTPS. `http://localhost` is treated as a secure development origin by modern browsers. Plain HTTP on a LAN IP may not show the install prompt or enable all service-worker behavior; use HTTPS for LAN PWA testing or test the PWA on `localhost`.
 
-The manifest currently has no custom icon files. Add production PNG icons in `frontend/public` and configure them in `frontend/vite.config.js` before publishing a branded install experience.
+The manifest currently has no custom icon files. Add production PNG icons in `backend/frontend/public` and configure them in `backend/frontend/vite.config.js` before publishing a branded install experience.
 
 ## Checks
 
 Run the frontend checks before deployment:
 
 ```powershell
-cd "C:\Users\MUKISA\Music\Altis Voyage\frontend"
+cd "C:\Users\MUKISA\Music\Altis Voyage\backend\frontend"
 npm run lint
 npm run build
 ```

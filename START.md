@@ -16,7 +16,7 @@ Backend URL: http://localhost:4000
 Open a second terminal:
 
 ```powershell
-cd "C:\Users\MUKISA\Music\Altis Voyage\frontend"
+cd "C:\Users\MUKISA\Music\Altis Voyage\backend\frontend"
 npm run dev
 ```
 
