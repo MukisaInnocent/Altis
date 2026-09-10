@@ -5,8 +5,9 @@ const path = require('path');
 const fs = require('fs');
 
 // Path to the built React frontend. Override with STATIC_ROOT env var if needed.
+// __dirname = backend/src  →  '..' = backend/  →  '../frontend/dist' = backend/frontend/dist
 const STATIC_ROOT = process.env.STATIC_ROOT ||
-  path.join(__dirname, '..', '..', 'frontend', 'dist');
+  path.join(__dirname, '..', 'frontend', 'dist');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 
