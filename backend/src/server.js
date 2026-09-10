@@ -4,10 +4,12 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
-// Path to the built React frontend. Override with STATIC_ROOT env var if needed.
+// Path to the built React frontend.
 // __dirname = backend/src  →  '..' = backend/  →  '../frontend/dist' = backend/frontend/dist
-const STATIC_ROOT = process.env.STATIC_ROOT ||
-  path.join(__dirname, '..', 'frontend', 'dist');
+const defaultStaticRoot = path.join(__dirname, '..', 'frontend', 'dist');
+const STATIC_ROOT = fs.existsSync(defaultStaticRoot) 
+  ? defaultStaticRoot 
+  : (process.env.STATIC_ROOT || defaultStaticRoot);
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 
