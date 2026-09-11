@@ -20,6 +20,15 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.HOST || '0.0.0.0';
 
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  if (process.env.NODE_ENV === 'production') res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || true }));
 app.use(express.json());
 
@@ -41,6 +50,20 @@ app.use('/images', express.static(IMAGES_ROOT, { maxAge: '7d' }));
 
 app.get('/health', (req, res) => {
   res.json({ ok: true });
+});
+
+const SITE_URL = 'https://www.altistravels.com';
+const PUBLIC_PATHS = ['/', '/about', '/services', '/destinations', '/tours', '/honeymoon', '/corporate-travel', '/airport-transfers', '/travel-insurance', '/family-reunification', '/why-choose-us', '/gallery', '/faq', '/travel-resources', '/privacy-policy', '/terms-and-conditions', '/contact'];
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain').send(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+});
+app.get('/sitemap.xml', (req, res) => {
+  const servicePaths = ['flight-reservations', 'visa-assistance', 'hotel-reservations', 'tour-packages', 'travel-insurance', 'airport-transfers', 'corporate-travel', 'family-reunification', 'cargo-shopping', 'university-admissions-scholarships', 'multi-country-itineraries'].map((slug) => `/services/${slug}`);
+  const destinationPaths = ['bwindi', 'queen-elizabeth', 'jinja', 'ssese-islands', 'bali', 'dubai', 'paris', 'santorini'].map((slug) => `/destinations/${slug}`);
+  const tourPaths = ['gorilla-trek', 'nile-source-adventure', 'classic-savanna-safari', 'dubai-desert-coast', 'bali-wellness-escape', 'european-classics', 'island-honeymoon'].map((slug) => `/tours/${slug}`);
+  const urls = [...PUBLIC_PATHS, ...servicePaths, ...destinationPaths, ...tourPaths];
+  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((url) => `<url><loc>${SITE_URL}${url}</loc></url>`).join('')}</urlset>`;
+  res.type('application/xml').send(body);
 });
 
 const VALID_CATEGORIES = fs.readdirSync(IMAGES_ROOT, { withFileTypes: true })
