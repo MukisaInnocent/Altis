@@ -107,6 +107,15 @@ CREATE TABLE IF NOT EXISTS posts (
 const imageColumns = db.prepare('PRAGMA table_info(images)').all().map((column) => column.name);
 if (!imageColumns.includes('slot')) db.exec('ALTER TABLE images ADD COLUMN slot TEXT DEFAULT NULL');
 
+// Keep databases created before CMS post images were renamed compatible.
+const postColumns = db.prepare('PRAGMA table_info(posts)').all().map((column) => column.name);
+if (!postColumns.includes('image_path')) {
+  db.exec("ALTER TABLE posts ADD COLUMN image_path TEXT DEFAULT ''");
+  if (postColumns.includes('featured_image')) {
+    db.exec("UPDATE posts SET image_path = featured_image WHERE image_path = '' AND featured_image IS NOT NULL");
+  }
+}
+
 // CMS defaults retain the existing public design and copy until an administrator changes them.
 const defaultSettings = {
   company_name: 'Altis Voyage Travel Services Ltd',

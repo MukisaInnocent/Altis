@@ -248,11 +248,16 @@ app.delete('/api/admin/images/:id', requireAuth, (req, res) => {
   const row = db.prepare('SELECT * FROM images WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Image not found.' });
   const imagePath = `/images/${row.category}/${row.filename}`;
-  const inUse = db.prepare('SELECT (SELECT COUNT(*) FROM site_sections WHERE image_path = ?) + (SELECT COUNT(*) FROM catalog_items WHERE image_path = ?) + (SELECT COUNT(*) FROM posts WHERE image_path = ?) AS count').get(imagePath, imagePath, imagePath).count;
-  if (inUse) return res.status(409).json({ error: 'This image is in use by published or draft content. Replace it there before deleting.' });
+  const inUse = db.prepare("SELECT (SELECT COUNT(*) FROM site_sections WHERE status = 'published' AND image_path = ?) + (SELECT COUNT(*) FROM catalog_items WHERE status = 'published' AND image_path = ?) + (SELECT COUNT(*) FROM posts WHERE status = 'published' AND image_path = ?) AS count").get(imagePath, imagePath, imagePath).count;
+  if (inUse) return res.status(409).json({ error: 'This image is in use on the live site. Replace it there before deleting.' });
   const filePath = path.join(IMAGES_ROOT, row.category, row.filename);
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  db.prepare('DELETE FROM images WHERE id = ?').run(row.id);
+  db.transaction(() => {
+    db.prepare("UPDATE site_sections SET image_path = '' WHERE status = 'draft' AND image_path = ?").run(imagePath);
+    db.prepare("UPDATE catalog_items SET image_path = '' WHERE status = 'draft' AND image_path = ?").run(imagePath);
+    db.prepare("UPDATE posts SET image_path = '' WHERE status = 'draft' AND image_path = ?").run(imagePath);
+    db.prepare('DELETE FROM images WHERE id = ?').run(row.id);
+  })();
   res.json({ ok: true });
 });
 
