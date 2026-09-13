@@ -29,7 +29,12 @@ CREATE TABLE IF NOT EXISTS inquiries (
   name TEXT NOT NULL,
   email TEXT,
   phone TEXT,
+  whatsapp TEXT DEFAULT '',
+  service TEXT DEFAULT '',
   destination TEXT,
+  travel_date TEXT DEFAULT '',
+  return_date TEXT DEFAULT '',
+  travellers INTEGER,
   message TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   read INTEGER NOT NULL DEFAULT 0
@@ -116,6 +121,19 @@ if (!postColumns.includes('image_path')) {
   }
 }
 
+// Preserve the full trip brief submitted through enquiry forms on older databases.
+const inquiryColumns = db.prepare('PRAGMA table_info(inquiries)').all().map((column) => column.name);
+const missingInquiryColumns = {
+  whatsapp: "TEXT DEFAULT ''",
+  service: "TEXT DEFAULT ''",
+  travel_date: "TEXT DEFAULT ''",
+  return_date: "TEXT DEFAULT ''",
+  travellers: 'INTEGER'
+};
+Object.entries(missingInquiryColumns).forEach(([name, definition]) => {
+  if (!inquiryColumns.includes(name)) db.exec(`ALTER TABLE inquiries ADD COLUMN ${name} ${definition}`);
+});
+
 // CMS defaults retain the existing public design and copy until an administrator changes them.
 const defaultSettings = {
   company_name: 'Altis Voyage Travel Services Ltd',
@@ -126,6 +144,11 @@ const defaultSettings = {
   bookings_email: 'bookings@altistravels.com',
   address: 'Equatorial Mall, Level 3, Room 342, Bombo Road, Kampala, Uganda',
   footer_tagline: 'Professional travel solutions from Kampala, Uganda.',
+  footer_registration_number: 'Reg. No. 80034849146981',
+  footer_developer_credit: 'Developed by Innotech Solution Uganda',
+  default_cta_title: 'Ready to make a plan?',
+  default_cta_text: 'Speak with the Altis Voyage team about your next journey.',
+  default_cta_label: 'Make an enquiry',
   home_seo_title: 'Altis Voyage Travel Services Ltd | Flights, Visas & Travel Services in Uganda',
   home_seo_description: 'Altis Voyage Travel Services Ltd is a professional travel agency in Uganda offering international and domestic flight tickets, visa services, travel insurance, holidays, cargo, university admissions and travel solutions.'
 };
@@ -143,7 +166,24 @@ const defaultSections = [
   ['about-team', 'About', 'Team', '', 'Our team', 'BUHIGIRO OLIVIER — Marketing\nNISHIMWE CYNTHIA — Director', '', ''],
   ['services-hero', 'Services', 'Hero', 'Our services', 'Everything you need to go further.', 'One trusted point of contact for the important details of travel.', '', ''],
   ['contact-hero', 'Contact', 'Hero', 'Contact centre', 'Let’s make a good plan.', 'Find the team at Equatorial Mall, Level 3, Room 342, Bombo Road, Kampala, Uganda.', '', ''],
-  ['resources-hero', 'Resources', 'Hero', 'Travel resources', 'Useful things to know before you go.', 'Travel tips, visa guidance, destination ideas and planning notes from the Altis Voyage team.', '', '']
+  ['resources-hero', 'Resources', 'Hero', 'Travel resources', 'Useful things to know before you go.', 'Travel tips, visa guidance, destination ideas and planning notes from the Altis Voyage team.', '', ''],
+  ['honeymoon-page', 'Honeymoon', 'Page content', 'Honeymoon travel', 'Start your next chapter somewhere unforgettable.', 'We plan thoughtful, romantic journeys around your preferred pace, experiences and budget.', 'Tell us what would make the trip feel special: a quiet beach stay, a safari, a city break or a multi-stop escape. Our team will turn that idea into a considered plan.', '/images/hero/sunset-savanna.svg'],
+  ['honeymoon-benefits', 'Honeymoon', 'Highlights', 'What we bring', 'A honeymoon shaped around the two of you.', '', 'Personal planning\nRomantic stays\nSmooth travel coordination', ''],
+  ['corporate-travel-page', 'Corporate travel', 'Page content', 'Corporate travel', 'Business travel that keeps moving.', 'Reliable planning for executives, teams, meetings and complex travel schedules.', 'We coordinate practical options around your organisation\'s timing, travel policy and priorities so people can focus on the work ahead.', '/images/hero/lake-bunyonyi.svg'],
+  ['corporate-travel-benefits', 'Corporate travel', 'Highlights', 'What we bring', 'A dependable travel partner.', '', 'Clear itineraries\nResponsive support\nCoordinated travel details', ''],
+  ['airport-transfers-page', 'Airport transfers', 'Page content', 'Airport transfers', 'Arrive with the next step already handled.', 'Comfortable, coordinated pickup and drop-off support for smooth arrivals and departures.', 'Share your flight details and destination, and we will help arrange a reliable transfer that fits your schedule.', '/images/hero/sunset-savanna.svg'],
+  ['airport-transfers-benefits', 'Airport transfers', 'Highlights', 'What we bring', 'A smoother journey from the airport.', '', 'Arrival and departure planning\nPractical timing support\nClear pickup coordination', ''],
+  ['travel-insurance-page', 'Travel insurance', 'Page content', 'Travel insurance', 'Travel with more peace of mind.', 'Practical travel-insurance guidance to help you prepare for your journey.', 'We help you understand available travel-insurance options and prepare the information needed for your planned trip.', '/images/hero/lake-bunyonyi.svg'],
+  ['travel-insurance-benefits', 'Travel insurance', 'Highlights', 'What we bring', 'Practical preparation before departure.', '', 'Policy guidance\nTravel-ready documents\nSupport alongside your wider plan', ''],
+  ['family-reunification-page', 'Family reunification', 'Page content', 'Family reunification', 'Make the journey back to each other simpler.', 'Thoughtful travel support for families reconnecting across borders.', 'We bring care and clear coordination to travel plans involving family visits, reunification and complex journey details.', '/images/hero/lake-bunyonyi.svg'],
+  ['family-reunification-benefits', 'Family reunification', 'Highlights', 'What we bring', 'Support when the journey matters most.', '', 'Personal attention\nClear travel steps\nConsidered coordination', ''],
+  ['why-choose-us-page', 'Why choose us', 'Page content', 'Why Altis Voyage', 'Travel support built around trust.', 'We combine practical travel knowledge with thoughtful, personal service.', 'Every enquiry begins with listening. From there, we bring the right details together into a travel plan that feels clear, considered and easy to act on.', '/images/hero/sunset-savanna.svg'],
+  ['why-choose-us-benefits', 'Why choose us', 'Highlights', 'What makes the difference', 'Travel support you can count on.', '', 'Personal planning\nPractical expertise\nResponsive communication\nCareful coordination', ''],
+  ['gallery-page', 'Gallery', 'Hero', 'Travel gallery', 'A closer look at where a good journey can lead.', 'Browse places, experiences and travel inspiration from Altis Voyage.', '', '/images/hero/lake-bunyonyi.svg'],
+  ['faq-page', 'FAQ', 'Hero', 'Frequently asked questions', 'Helpful answers before you begin.', 'A few common questions about planning travel with Altis Voyage.', '', '/images/hero/lake-bunyonyi.svg'],
+  ['faq-items', 'FAQ', 'Questions', 'FAQ content', 'Frequently asked questions', 'Use one question and answer per line, separated by two vertical bars (||).', 'Can you help with visa applications? || Yes. We provide practical guidance, document reviews and application support.\nCan you plan a full holiday package? || Yes. We can coordinate flights, accommodation, transfers, tours and itinerary planning.\nDo you arrange travel insurance? || We provide travel-insurance guidance as part of preparing your trip.\nHow do I start? || Send an enquiry with your destination, dates and the help you need.', ''],
+  ['privacy-policy-page', 'Privacy policy', 'Page content', 'Privacy', 'Privacy policy', 'How Altis Voyage handles the information you share with us.', 'We use the personal details you provide to respond to enquiries, prepare travel arrangements and provide the services you request. We keep information only as needed for those purposes and do not sell your personal information.\n\nYou may contact us to ask about the personal information we hold or to request an update. If you have a privacy question, please contact our team using the details on the Contact page.', ''],
+  ['terms-and-conditions-page', 'Terms and conditions', 'Page content', 'Terms', 'Terms and conditions', 'Important information about using Altis Voyage travel-planning services.', 'Travel arrangements are subject to availability, supplier rules, visa requirements and the terms provided with a confirmed booking. Prices, documents and itinerary details should be checked before travel.\n\nOur team provides planning and coordination support. Decisions by airlines, embassies, insurers and other third parties remain subject to their own policies and requirements.', '']
 ];
 const addSection = db.prepare('INSERT OR IGNORE INTO site_sections (section_key, page_name, section_name, eyebrow, title, summary, body, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
 defaultSections.forEach((section) => addSection.run(...section));

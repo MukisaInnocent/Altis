@@ -145,25 +145,32 @@ function validText(value, max = 10000) {
 }
 
 app.get('/api/site-data', (req, res) => {
-  const sections = db.prepare("SELECT section_key, page_name, section_name, eyebrow, title, summary, body, image_path, seo_title, seo_description, updated_at FROM site_sections WHERE status = 'published'").all();
-  const catalog = db.prepare("SELECT id, item_type, slug, title, summary, country, duration, image_path, seo_title, seo_description, sort_order FROM catalog_items WHERE status = 'published' ORDER BY item_type, sort_order, id").all();
+  const sections = db.prepare("SELECT section_key, page_name, section_name, eyebrow, title, summary, body, CASE WHEN image_path = '' OR EXISTS (SELECT 1 FROM images WHERE images.active = 1 AND site_sections.image_path = '/images/' || images.category || '/' || images.filename) THEN image_path ELSE '' END AS image_path, seo_title, seo_description, updated_at FROM site_sections WHERE status = 'published'").all();
+  const catalog = db.prepare("SELECT id, item_type, slug, title, summary, country, duration, CASE WHEN image_path = '' OR EXISTS (SELECT 1 FROM images WHERE images.active = 1 AND catalog_items.image_path = '/images/' || images.category || '/' || images.filename) THEN image_path ELSE '' END AS image_path, seo_title, seo_description, sort_order FROM catalog_items WHERE status = 'published' ORDER BY item_type, sort_order, id").all();
   res.json({ settings: settingsObject(), sections, catalog });
 });
 
 app.get('/api/posts', (req, res) => {
-  const posts = db.prepare("SELECT id, slug, title, excerpt, body, image_path, seo_title, seo_description, published_at FROM posts WHERE status = 'published' ORDER BY published_at DESC, id DESC").all();
+  const posts = db.prepare("SELECT id, slug, title, excerpt, body, CASE WHEN image_path = '' OR EXISTS (SELECT 1 FROM images WHERE images.active = 1 AND posts.image_path = '/images/' || images.category || '/' || images.filename) THEN image_path ELSE '' END AS image_path, seo_title, seo_description, published_at FROM posts WHERE status = 'published' ORDER BY published_at DESC, id DESC").all();
   res.json(posts);
+});
+
+app.get('/api/posts/:slug', (req, res) => {
+  const post = db.prepare("SELECT id, slug, title, excerpt, body, CASE WHEN image_path = '' OR EXISTS (SELECT 1 FROM images WHERE images.active = 1 AND posts.image_path = '/images/' || images.category || '/' || images.filename) THEN image_path ELSE '' END AS image_path, seo_title, seo_description, published_at FROM posts WHERE status = 'published' AND slug = ?").get(req.params.slug);
+  if (!post) return res.status(404).json({ error: 'Post not found.' });
+  res.json(post);
 });
 
 // ---------- Public: inquiries ----------
 app.post('/api/inquiries', (req, res) => {
-  const { name, email, phone, destination, message } = req.body || {};
+  const { name, email, phone, whatsapp, service, service_required, destination, travel_date, return_date, travellers, message } = req.body || {};
   if (!name || !message) {
     return res.status(400).json({ error: 'Name and message are required.' });
   }
+  const travellerCount = Number.parseInt(travellers, 10);
   db.prepare(
-    'INSERT INTO inquiries (name, email, phone, destination, message) VALUES (?, ?, ?, ?, ?)'
-  ).run(name, email || '', phone || '', destination || '', message);
+    'INSERT INTO inquiries (name, email, phone, whatsapp, service, destination, travel_date, return_date, travellers, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(name, email || '', phone || '', whatsapp || '', service_required || service || '', destination || '', travel_date || '', return_date || '', Number.isInteger(travellerCount) && travellerCount > 0 ? travellerCount : null, message);
   db.prepare('INSERT INTO stats (event, meta) VALUES (?, ?)').run('inquiry_submitted', destination || '');
   res.status(201).json({ ok: true });
 });
@@ -201,10 +208,19 @@ app.post('/api/admin/change-password', requireAuth, (req, res) => {
 app.get('/api/admin/images', requireAuth, (req, res) => {
   syncImagesFromDisk();
   const rows = db.prepare('SELECT * FROM images ORDER BY category, sort_order, id').all();
+  const sectionUsage = db.prepare('SELECT page_name, section_name, status FROM site_sections WHERE image_path = ?');
+  const catalogUsage = db.prepare('SELECT item_type, title, status FROM catalog_items WHERE image_path = ?');
+  const postUsage = db.prepare('SELECT title, status FROM posts WHERE image_path = ?');
   const grouped = {};
   for (const r of rows) {
+    const imagePath = `/images/${r.category}/${r.filename}`;
+    const usage = [
+      ...sectionUsage.all(imagePath).map((item) => ({ label: `${item.page_name}: ${item.section_name}`, status: item.status, type: 'section' })),
+      ...catalogUsage.all(imagePath).map((item) => ({ label: `${item.item_type}: ${item.title}`, status: item.status, type: 'catalog' })),
+      ...postUsage.all(imagePath).map((item) => ({ label: `Post: ${item.title}`, status: item.status, type: 'post' }))
+    ];
     grouped[r.category] = grouped[r.category] || [];
-    grouped[r.category].push({ ...r, url: `/images/${r.category}/${r.filename}` });
+    grouped[r.category].push({ ...r, url: imagePath, usage });
   }
   res.json({ categories: VALID_CATEGORIES, images: grouped });
 });

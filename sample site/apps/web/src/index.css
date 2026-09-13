@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bitter:wght@600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Archivo", sans-serif;
+  overflow-x: clip;
+}
+
+.font-display {
+  font-family: "Bitter", serif;
+}
+
+/* Documentary photo treatment — unifies imagery into one sepia world */
+.photo {
+  filter: sepia(0.28) saturate(0.88) contrast(1.03);
+}
+
+/* Halftone print texture overlay (fixed/relative containers only) */
+.halftone {
+  position: relative;
+}
+.halftone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(43, 32, 19, 0.16) 1px, transparent 1.4px);
+  background-size: 5px 5px;
+  mix-blend-mode: multiply;
+}
+
+/* Bracket corner marks framing featured content */
+.brackets {
+  position: relative;
+}
+.brackets::before,
+.brackets::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  pointer-events: none;
+  background-repeat: no-repeat;
+}
+.brackets::before {
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor);
+  background-size: 26px 2px, 2px 26px, 26px 2px, 2px 26px;
+  background-position: top left, top left, bottom right, bottom right;
+}
+.brackets::after {
+  background-image:
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor),
+    linear-gradient(currentColor, currentColor);
+  background-size: 26px 2px, 2px 26px, 26px 2px, 2px 26px;
+  background-position: top right, top right, bottom left, bottom left;
+}
+
+/* The one continuous focal animation: slow documentary drift on the hero */
+@keyframes hero-drift {
+  from { transform: scale(1.04) translate(0, 0); }
+  to { transform: scale(1.16) translate(-1.6%, -1.2%); }
+}
+.hero-drift {
+  animation: hero-drift 28s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-drift { animation: none; }
+}
+
+.caption-num {
+  font-family: "Archivo", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/*
+  ---break---
+*/
+
+@layer base {
+  :root {
+    --background: 38 32% 93%;
+    --foreground: 26 26% 13%;
+    --card: 40 30% 96%;
+    --card-foreground: 26 26% 13%;
+    --popover: 40 30% 96%;
+    --popover-foreground: 26 26% 13%;
+    --primary: 25 48% 24%;
+    --primary-foreground: 40 33% 95%;
+    --secondary: 36 22% 87%;
+    --secondary-foreground: 26 26% 15%;
+    --muted: 36 18% 86%;
+    --muted-foreground: 28 13% 38%;
+    --accent: 28 52% 32%;
+    --accent-foreground: 40 33% 95%;
+    --destructive: 8 60% 36%;
+    --destructive-foreground: 40 33% 95%;
+    --border: 30 16% 76%;
+    --input: 30 16% 72%;
+    --ring: 25 48% 24%;
+    --radius: 0.25rem;
+    --sidebar-background: 38 32% 93%;
+    --sidebar-foreground: 26 26% 13%;
+    --sidebar-primary: 25 48% 24%;
+    --sidebar-primary-foreground: 40 33% 95%;
+    --sidebar-accent: 36 22% 87%;
+    --sidebar-accent-foreground: 26 26% 15%;
+    --sidebar-border: 30 16% 76%;
+    --sidebar-ring: 25 48% 24%;
+  }
+  .dark {
+    --background: 26 22% 9%;
+    --foreground: 40 24% 90%;
+    --card: 26 20% 13%;
+    --card-foreground: 40 24% 90%;
+    --popover: 26 20% 13%;
+    --popover-foreground: 40 24% 90%;
+    --primary: 36 34% 78%;
+    --primary-foreground: 26 26% 12%;
+    --secondary: 28 14% 18%;
+    --secondary-foreground: 40 24% 90%;
+    --muted: 28 14% 18%;
+    --muted-foreground: 34 12% 62%;
+    --accent: 30 40% 55%;
+    --accent-foreground: 26 26% 10%;
+    --destructive: 6 50% 42%;
+    --destructive-foreground: 40 33% 95%;
+    --border: 30 12% 24%;
+    --input: 30 12% 28%;
+    --ring: 36 34% 78%;
+    --sidebar-background: 26 22% 9%;
+    --sidebar-foreground: 40 24% 90%;
+    --sidebar-primary: 36 34% 78%;
+    --sidebar-primary-foreground: 26 26% 12%;
+    --sidebar-accent: 28 14% 18%;
+    --sidebar-accent-foreground: 40 24% 90%;
+    --sidebar-border: 30 12% 24%;
+    --sidebar-ring: 36 34% 78%;
+  }
+}

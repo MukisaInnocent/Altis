@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link, Route, Routes, useNavigate } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useState } from 'react'
+import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowRight, Check, ChevronLeft, ChevronRight, Clock3, Eye, Camera, LogOut, Mail, Menu, MessageCircle, Sparkles, Trash2, Upload, X } from 'lucide-react'
 import './App.css'
 import { CmsPublicApp } from './PublicExperience'
@@ -36,7 +36,18 @@ function LegacyStandalonePage({ type }) {
 function PublicHeader() { const [menu, setMenu] = useState(false); return <header className="nav"><Link className="brand" to="/"><img src="/logo.jpg" alt="Altis Voyage Travel"/></Link><button className="menu-button" onClick={() => setMenu(!menu)} aria-label="Menu">{menu ? <X/> : <Menu/>}</button><nav className={menu ? 'nav-links open' : 'nav-links'}>{nav.map(([label, path]) => <Link key={path} to={path} onClick={() => setMenu(false)}>{label}</Link>)}<a className="nav-whatsapp" href="https://wa.me/256756037524"><MessageCircle size={16}/> WhatsApp</a></nav></header> }
 function ContactForm() { const [sent, setSent] = useState(''); const submit = async (e) => { e.preventDefault(); const form = e.currentTarget; try { await api('/api/inquiries', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(form))) }); setSent('Thanks. We will be in touch shortly.'); form.reset() } catch (err) { setSent(err.message || 'Unable to send your enquiry. Please try again.') } }; return <section className="contact page-contact"><div><div className="tag">Reach us</div><h2>We are ready when you are.</h2><p>Equatorial Mall, Level 3, Room 342<br/>Bombo Road, Kampala, Uganda</p><p><a href="tel:+256788748128">+256 788 748 128</a><br/><a href="tel:+256756037524">+256 756 037 524</a></p><p><a href="mailto:info@altistravels.com">info@altistravels.com</a><br/><a href="mailto:bookings@altistravels.com">bookings@altistravels.com</a></p></div><form onSubmit={submit}><label>Your name<input name="name" required/></label><label>Email<input name="email" type="email"/></label><label>Phone<input name="phone"/></label><label>Destination<input name="destination"/></label><label className="full">Message<textarea name="message" rows="5" required/></label><Button type="submit">Send enquiry</Button>{sent && <p className="form-message"><Check size={16}/> {sent}</p>}</form></section> }
 function SiteFooter() { return <footer className="footer"><Link className="brand" to="/"><img src="/logo.jpg" alt="Altis Voyage Travel"/></Link><p>Professional travel management from Kampala.</p><div><Link to="/about">About</Link><Link to="/contact">Contact</Link><Link to="/admin">Admin</Link><a href="https://instagram.com/altisvoyages"><Camera size={17}/></a></div><small>© 2026 Altis Voyage Travel Services Ltd. Company Registration No. 80034849146981</small></footer> }
-function App(){return <Routes><Route path="/admin" element={<AdminCMS/>}/><Route path="*" element={<CmsPublicApp/>}/></Routes>}
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useLayoutEffect(() => {
+    const previousRestoration = window.history.scrollRestoration
+    window.history.scrollRestoration = 'manual'
+    window.scrollTo(0, 0)
+    return () => { window.history.scrollRestoration = previousRestoration }
+  }, [pathname])
+  return null
+}
+
+function App(){return <><ScrollToTop/><Routes><Route path="/admin" element={<AdminCMS/>}/><Route path="*" element={<CmsPublicApp/>}/></Routes></>}
 export default App
 
 

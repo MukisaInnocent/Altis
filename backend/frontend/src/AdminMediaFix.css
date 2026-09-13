@@ -47,6 +47,52 @@
   min-height: 30px;
 }
 
+.cms-inquiry .cms-trip-details {
+  display: block;
+  margin-top: 5px;
+}
+
+.cms-section-group {
+  margin-bottom: 32px;
+}
+
+.cms-section-group .cms-toolbar {
+  margin-bottom: 12px;
+}
+
+.cms-section-group .cms-toolbar h2 {
+  font-size: 24px;
+}
+
+.cms-media-usage {
+  display: block;
+  min-height: 18px;
+  color: #627181;
+  font-size: 11px;
+}
+
+.cms-media-usage.live {
+  color: #9a5b12;
+  font-weight: 700;
+}
+
+.cms-show-more {
+  display: block;
+  margin: 18px auto 0;
+  padding: 9px 14px;
+  border: 1px solid #c9d6df;
+  background: #fff;
+  color: #173c60;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cms-show-more:hover {
+  border-color: #2b8da3;
+  color: #0d6578;
+}
+
 @media (max-width: 560px) {
   .cms-media-grid { grid-template-columns: 1fr; }
   .cms-media-card { min-height: 0; }
