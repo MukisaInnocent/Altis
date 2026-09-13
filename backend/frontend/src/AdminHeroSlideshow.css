@@ -1,0 +1,11 @@
+.hero-image-picker { padding: 18px; border: 1px solid #d6e0e7; border-radius: 6px; background: #f8fafb; }
+.hero-image-picker > small { line-height: 1.55; }
+.hero-image-list { display: grid; gap: 8px; margin-top: 8px; }
+.hero-image-row { display: grid; grid-template-columns: 28px minmax(150px, 1fr) auto auto auto; align-items: center; gap: 8px; }
+.hero-image-row > span { color: #627181; font-size: 12px; }
+.hero-image-row select, .hero-image-add { width: 100%; min-width: 0; padding: 9px; border: 1px solid #cbd5dd; border-radius: 4px; background: #fff; color: #152437; }
+.hero-image-row button { padding: 8px 9px; border: 1px solid #cbd5dd; border-radius: 4px; background: #fff; color: #173c60; font-size: 11px; font-weight: 700; }
+.hero-image-row button:disabled { opacity: .45; cursor: not-allowed; }
+.hero-image-row .remove { color: #9d2f3d; }
+.hero-image-add { margin-top: 10px; }
+@media (max-width: 850px) { .hero-image-row { grid-template-columns: 24px 1fr; } .hero-image-row button { width: max-content; } }

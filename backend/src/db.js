@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS site_sections (
   summary TEXT DEFAULT '',
   body TEXT DEFAULT '',
   image_path TEXT DEFAULT '',
+  hero_images TEXT NOT NULL DEFAULT '[]',
   seo_title TEXT DEFAULT '',
   seo_description TEXT DEFAULT '',
   status TEXT NOT NULL DEFAULT 'published' CHECK(status IN ('draft', 'published')),
@@ -111,6 +112,10 @@ CREATE TABLE IF NOT EXISTS posts (
 // Add slot support to databases created before image replacement was added.
 const imageColumns = db.prepare('PRAGMA table_info(images)').all().map((column) => column.name);
 if (!imageColumns.includes('slot')) db.exec('ALTER TABLE images ADD COLUMN slot TEXT DEFAULT NULL');
+
+// Keep the original single image as a fallback while allowing an ordered slideshow.
+const sectionColumns = db.prepare('PRAGMA table_info(site_sections)').all().map((column) => column.name);
+if (!sectionColumns.includes('hero_images')) db.exec("ALTER TABLE site_sections ADD COLUMN hero_images TEXT NOT NULL DEFAULT '[]'");
 
 // Keep databases created before CMS post images were renamed compatible.
 const postColumns = db.prepare('PRAGMA table_info(posts)').all().map((column) => column.name);
@@ -158,7 +163,10 @@ Object.entries(defaultSettings).forEach(([key, value]) => addSetting.run(key, va
 const defaultSections = [
   ['home-hero', 'Home', 'Hero', 'Altis Voyage Travel Services Ltd', 'Travel with\nintention.', 'Global travel planning for safaris, beach escapes, city breaks and extraordinary journeys designed around your pace, goals and dreams.', '', '/images/hero/lake-bunyonyi.svg'],
   ['home-ai', 'Home', 'Travel planning', 'AI concierge guide', 'Customer care that feels immediate, polished and personal.', 'Use the travel search to explore ideas quickly, then let our team turn those inspirations into a precise itinerary, a visa plan, or a tailored holiday route.', '', ''],
+  ['home-stats', 'Home', 'Trust figures', '', 'Travel at a glance', 'Optional homepage figures. Enter one figure per line in the Main content field as: value || label.', '', ''],
   ['home-intro', 'Home', 'Travel support', '02 / Travel support', 'Good journeys begin with good questions.', 'Altis Voyage Travel Services Ltd is a professional travel management company based in Kampala, Uganda. We provide flight reservations, visa assistance, hotel bookings, holiday packages, travel insurance, airport transfers, and corporate travel solutions.', '', ''],
+  ['home-gallery', 'Home', 'Gallery highlights', '05 / Field notes', 'From recent journeys', 'A glimpse of the places and experiences we help you reach.', '', ''],
+  ['home-testimonials', 'Home', 'Traveller reviews', '06 / Travellers', 'Word from the road', 'Optional verified traveller reviews. Enter one review per line in the Main content field as: quote || name || location or trip || rating.', '', ''],
   ['about-hero', 'About', 'Hero', 'About Altis Voyage', 'Travel made personal.', 'Professional, considered travel support from Kampala to the world.', '', ''],
   ['about-company', 'About', 'Company', 'Our company', 'Built around the details that make travel feel easy.', 'Altis Voyage Travel Services Ltd is a professional travel management company based in Kampala, Uganda, with a growing international outlook. We help travellers arrange flights, visas, accommodation, tours, transfers and complete itineraries for business and leisure travel.\n\nWe work with a practical, service-first mindset, helping clients move from inspiration to a clear action plan. The aim is to make the travel experience feel considered, exciting and easy to trust from the very first enquiry.', '', ''],
   ['about-mission', 'About', 'Mission', '', 'Mission', 'To provide exceptional travel services through professionalism, integrity, innovation and customer-focused planning.', '', ''],

@@ -140,12 +140,32 @@ function isUploadedImagePath(value) {
   return Boolean(db.prepare('SELECT 1 FROM images WHERE category = ? AND filename = ?').get(match[1], match[2]));
 }
 
+function heroImagePaths(value) {
+  if (!value) return [];
+  let paths = value;
+  if (typeof value === 'string') {
+    try { paths = JSON.parse(value); } catch { paths = []; }
+  }
+  if (!Array.isArray(paths)) return [];
+  return [...new Set(paths.filter((path) => typeof path === 'string' && isUploadedImagePath(path)))];
+}
+
+function isActiveImagePath(value) {
+  const match = /^\/images\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9._-]+)$/.exec(value || '');
+  return Boolean(match && db.prepare('SELECT 1 FROM images WHERE category = ? AND filename = ? AND active = 1').get(match[1], match[2]));
+}
+
+function sectionWithHeroImages(section, includeInactive = false) {
+  const paths = heroImagePaths(section.hero_images);
+  return { ...section, hero_images: includeInactive ? paths : paths.filter(isActiveImagePath) };
+}
+
 function validText(value, max = 10000) {
   return typeof value === 'string' && value.length <= max;
 }
 
 app.get('/api/site-data', (req, res) => {
-  const sections = db.prepare("SELECT section_key, page_name, section_name, eyebrow, title, summary, body, CASE WHEN image_path = '' OR EXISTS (SELECT 1 FROM images WHERE images.active = 1 AND site_sections.image_path = '/images/' || images.category || '/' || images.filename) THEN image_path ELSE '' END AS image_path, seo_title, seo_description, updated_at FROM site_sections WHERE status = 'published'").all();
+  const sections = db.prepare("SELECT section_key, page_name, section_name, eyebrow, title, summary, body, CASE WHEN image_path = '' OR EXISTS (SELECT 1 FROM images WHERE images.active = 1 AND site_sections.image_path = '/images/' || images.category || '/' || images.filename) THEN image_path ELSE '' END AS image_path, hero_images, seo_title, seo_description, updated_at FROM site_sections WHERE status = 'published'").all().map((section) => sectionWithHeroImages(section));
   const catalog = db.prepare("SELECT id, item_type, slug, title, summary, country, duration, CASE WHEN image_path = '' OR EXISTS (SELECT 1 FROM images WHERE images.active = 1 AND catalog_items.image_path = '/images/' || images.category || '/' || images.filename) THEN image_path ELSE '' END AS image_path, seo_title, seo_description, sort_order FROM catalog_items WHERE status = 'published' ORDER BY item_type, sort_order, id").all();
   res.json({ settings: settingsObject(), sections, catalog });
 });
@@ -209,6 +229,7 @@ app.get('/api/admin/images', requireAuth, (req, res) => {
   syncImagesFromDisk();
   const rows = db.prepare('SELECT * FROM images ORDER BY category, sort_order, id').all();
   const sectionUsage = db.prepare('SELECT page_name, section_name, status FROM site_sections WHERE image_path = ?');
+  const sectionHeroUsage = db.prepare('SELECT page_name, section_name, status, hero_images FROM site_sections');
   const catalogUsage = db.prepare('SELECT item_type, title, status FROM catalog_items WHERE image_path = ?');
   const postUsage = db.prepare('SELECT title, status FROM posts WHERE image_path = ?');
   const grouped = {};
@@ -216,6 +237,7 @@ app.get('/api/admin/images', requireAuth, (req, res) => {
     const imagePath = `/images/${r.category}/${r.filename}`;
     const usage = [
       ...sectionUsage.all(imagePath).map((item) => ({ label: `${item.page_name}: ${item.section_name}`, status: item.status, type: 'section' })),
+      ...sectionHeroUsage.all().filter((item) => heroImagePaths(item.hero_images).includes(imagePath)).map((item) => ({ label: `${item.page_name}: ${item.section_name} hero slideshow`, status: item.status, type: 'hero' })),
       ...catalogUsage.all(imagePath).map((item) => ({ label: `${item.item_type}: ${item.title}`, status: item.status, type: 'catalog' })),
       ...postUsage.all(imagePath).map((item) => ({ label: `Post: ${item.title}`, status: item.status, type: 'post' }))
     ];
@@ -264,7 +286,7 @@ app.delete('/api/admin/images/:id', requireAuth, (req, res) => {
   const row = db.prepare('SELECT * FROM images WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Image not found.' });
   const imagePath = `/images/${row.category}/${row.filename}`;
-  const inUse = db.prepare("SELECT (SELECT COUNT(*) FROM site_sections WHERE status = 'published' AND image_path = ?) + (SELECT COUNT(*) FROM catalog_items WHERE status = 'published' AND image_path = ?) + (SELECT COUNT(*) FROM posts WHERE status = 'published' AND image_path = ?) AS count").get(imagePath, imagePath, imagePath).count;
+  const inUse = db.prepare("SELECT (SELECT COUNT(*) FROM site_sections WHERE status = 'published' AND image_path = ?) + (SELECT COUNT(*) FROM catalog_items WHERE status = 'published' AND image_path = ?) + (SELECT COUNT(*) FROM posts WHERE status = 'published' AND image_path = ?) AS count").get(imagePath, imagePath, imagePath).count + db.prepare("SELECT hero_images FROM site_sections WHERE status = 'published'").all().filter((section) => heroImagePaths(section.hero_images).includes(imagePath)).length;
   if (inUse) return res.status(409).json({ error: 'This image is in use on the live site. Replace it there before deleting.' });
   const filePath = path.join(IMAGES_ROOT, row.category, row.filename);
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
@@ -272,6 +294,11 @@ app.delete('/api/admin/images/:id', requireAuth, (req, res) => {
     db.prepare("UPDATE site_sections SET image_path = '' WHERE status = 'draft' AND image_path = ?").run(imagePath);
     db.prepare("UPDATE catalog_items SET image_path = '' WHERE status = 'draft' AND image_path = ?").run(imagePath);
     db.prepare("UPDATE posts SET image_path = '' WHERE status = 'draft' AND image_path = ?").run(imagePath);
+    db.prepare("SELECT id, hero_images FROM site_sections WHERE status = 'draft'").all().forEach((section) => {
+      const current = heroImagePaths(section.hero_images);
+      const remaining = current.filter((path) => path !== imagePath);
+      if (remaining.length !== current.length) db.prepare('UPDATE site_sections SET hero_images = ? WHERE id = ?').run(JSON.stringify(remaining), section.id);
+    });
     db.prepare('DELETE FROM images WHERE id = ?').run(row.id);
   })();
   res.json({ ok: true });
@@ -333,14 +360,16 @@ app.put('/api/admin/settings', requireAuth, (req, res) => {
 });
 
 app.get('/api/admin/sections', requireAuth, (req, res) => {
-  res.json(db.prepare('SELECT * FROM site_sections ORDER BY page_name, id').all());
+  res.json(db.prepare('SELECT * FROM site_sections ORDER BY page_name, id').all().map((section) => sectionWithHeroImages(section, true)));
 });
 
 app.put('/api/admin/sections/:id', requireAuth, (req, res) => {
   const item = req.body || {};
-  if (!validText(item.eyebrow, 300) || !validText(item.title, 300) || !validText(item.summary, 3000) || !validText(item.body, 12000) || !validText(item.seo_title, 300) || !validText(item.seo_description, 1000) || !isUploadedImagePath(item.image_path || '')) return res.status(400).json({ error: 'Use text within the field limits and select an uploaded image.' });
+  const requestedHeroImages = item.hero_images || [];
+  const heroImages = heroImagePaths(requestedHeroImages);
+  if (!Array.isArray(requestedHeroImages) || heroImages.length !== requestedHeroImages.length || !validText(item.eyebrow, 300) || !validText(item.title, 300) || !validText(item.summary, 3000) || !validText(item.body, 12000) || !validText(item.seo_title, 300) || !validText(item.seo_description, 1000) || !isUploadedImagePath(item.image_path || '')) return res.status(400).json({ error: 'Use text within the field limits and select uploaded images.' });
   const status = item.status === 'draft' ? 'draft' : 'published';
-  const result = db.prepare('UPDATE site_sections SET eyebrow=?, title=?, summary=?, body=?, image_path=?, seo_title=?, seo_description=?, status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(item.eyebrow.trim(), item.title.trim(), item.summary.trim(), item.body.trim(), item.image_path || '', item.seo_title.trim(), item.seo_description.trim(), status, req.params.id);
+  const result = db.prepare('UPDATE site_sections SET eyebrow=?, title=?, summary=?, body=?, image_path=?, hero_images=?, seo_title=?, seo_description=?, status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(item.eyebrow.trim(), item.title.trim(), item.summary.trim(), item.body.trim(), item.image_path || '', JSON.stringify(heroImages), item.seo_title.trim(), item.seo_description.trim(), status, req.params.id);
   if (!result.changes) return res.status(404).json({ error: 'Section not found.' });
   res.json({ ok: true });
 });
