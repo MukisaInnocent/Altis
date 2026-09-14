@@ -1,22 +1,14 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawn } = require('node:child_process');
+const crypto = require('node:crypto');
 const { URL } = require('node:url');
 
 const PORT = Number(process.env.PORT || 8080);
-const POCKETBASE_PORT = Number(process.env.POCKETBASE_PORT || 8090);
 const PUBLIC_DIR = path.resolve(__dirname, '..', 'dist', 'apps', 'web');
-const POCKETBASE_ROOT = path.resolve(__dirname, '..', 'apps', 'pocketbase');
 const APPLICATION_ROOT = path.resolve(__dirname, '..');
-const configuredPocketbaseBinary = process.env.POCKETBASE_BINARY;
-const configuredPocketbaseDataDir = process.env.POCKETBASE_DATA_DIR;
-const POCKETBASE_BINARY = configuredPocketbaseBinary
-    ? path.resolve(APPLICATION_ROOT, configuredPocketbaseBinary)
-    : undefined;
-const POCKETBASE_DATA_DIR = configuredPocketbaseDataDir
-    ? path.resolve(APPLICATION_ROOT, configuredPocketbaseDataDir)
-    : path.resolve(POCKETBASE_ROOT, 'pb_data');
+const DATA_DIR = path.resolve(APPLICATION_ROOT, process.env.APP_DATA_DIR || 'data');
+const DATA_FILE = path.join(DATA_DIR, 'altis-voyage.json');
 
 if (!fs.existsSync(path.join(PUBLIC_DIR, 'index.html'))) {
     console.error(`Frontend build not found at ${PUBLIC_DIR}`);
@@ -41,50 +33,117 @@ const MIME_TYPES = {
 
 let pocketbaseProcess;
 
-if (POCKETBASE_BINARY) {
-    if (!fs.existsSync(POCKETBASE_BINARY)) {
-        console.error(`PocketBase binary not found at ${POCKETBASE_BINARY}`);
-        process.exit(1);
-    }
+const sessions = new Map();
 
-    pocketbaseProcess = spawn(POCKETBASE_BINARY, [
-        'serve',
-        `--http=127.0.0.1:${POCKETBASE_PORT}`,
-        '--encryptionEnv=PB_ENCRYPTION_KEY',
-        `--dir=${POCKETBASE_DATA_DIR}`,
-        `--migrationsDir=${path.join(POCKETBASE_ROOT, 'pb_migrations')}`,
-        `--hooksDir=${path.join(POCKETBASE_ROOT, 'pb_hooks')}`,
-        '--hooksWatch=false',
-    ], { stdio: 'inherit' });
-
-    pocketbaseProcess.on('exit', (code, signal) => {
-        console.error(`PocketBase stopped (code=${code}, signal=${signal || 'none'})`);
-        process.exitCode = code || 1;
+function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+    return new Promise((resolve, reject) => {
+        crypto.scrypt(password, salt, 64, (error, derivedKey) => {
+            if (error) reject(error);
+            else resolve({ salt, hash: derivedKey.toString('hex') });
+        });
     });
-} else {
-    console.warn('POCKETBASE_BINARY is not configured; CMS proxy is disabled.');
 }
 
-function proxyToPocketBase(request, response) {
-    const proxyRequest = http.request({
-        hostname: '127.0.0.1',
-        port: POCKETBASE_PORT,
-        method: request.method,
-        path: request.url.replace(/^\/hcgi\/platform/, '') || '/',
-        headers: { ...request.headers, host: `127.0.0.1:${POCKETBASE_PORT}` },
-    }, (proxyResponse) => {
-        response.writeHead(proxyResponse.statusCode || 502, proxyResponse.headers);
-        proxyResponse.pipe(response);
-    });
+function safeEqual(left, right) {
+    const a = Buffer.from(left, 'hex');
+    const b = Buffer.from(right, 'hex');
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
-    proxyRequest.on('error', () => {
-        if (!response.headersSent) {
-            response.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
+function readStore() {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    if (!fs.existsSync(DATA_FILE)) {
+        const password = process.env.PB_SUPERUSER_PASSWORD || 'change-this-production-password';
+        const adminEmail = process.env.PB_SUPERUSER_EMAIL || 'admin@altistravels.com';
+        return { users: [], collections: {}, adminEmail, adminPassword: password };
+    }
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+}
+
+let store = readStore();
+let adminPasswordRecord = store.adminPasswordHash;
+const initialAdminPassword = store.adminPassword || process.env.PB_SUPERUSER_PASSWORD;
+if (!adminPasswordRecord && initialAdminPassword) {
+    adminPasswordRecord = crypto.scryptSync(initialAdminPassword, 'altis-voyage-admin', 64).toString('hex');
+    store.adminPasswordHash = adminPasswordRecord;
+    delete store.adminPassword;
+    fs.writeFileSync(DATA_FILE, JSON.stringify(store, null, 2));
+}
+
+function saveStore() {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(store, null, 2));
+}
+
+function json(response, status, body) {
+    response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify(body));
+}
+
+function parseBody(request) {
+    return new Promise((resolve, reject) => {
+        let body = '';
+        request.on('data', (chunk) => { body += chunk; });
+        request.on('end', () => {
+            try { resolve(body ? JSON.parse(body) : {}); } catch (error) { reject(error); }
+        });
+        request.on('error', reject);
+    });
+}
+
+function authRecord(email) {
+    return { id: 'admin', collectionId: 'users', collectionName: 'users', email, role: 'admin', verified: true };
+}
+
+async function handleApi(request, response, apiPath) {
+    if (apiPath === '/api/health') return json(response, 200, { code: 200, message: 'API is healthy.' });
+
+    if (apiPath === '/api/collections/users/auth-with-password' && request.method === 'POST') {
+        const body = await parseBody(request);
+        const email = body.identity || body.email;
+        const passwordHash = crypto.scryptSync(body.password || '', 'altis-voyage-admin', 64).toString('hex');
+        if (email !== (store.adminEmail || process.env.PB_SUPERUSER_EMAIL || 'admin@altistravels.com') || !adminPasswordRecord || !safeEqual(passwordHash, adminPasswordRecord)) {
+            return json(response, 400, { code: 400, message: 'Invalid email or password.' });
         }
-        response.end(JSON.stringify({ message: 'PocketBase is not ready.' }));
-    });
+        const token = crypto.randomBytes(32).toString('hex');
+        const record = authRecord(email);
+        sessions.set(token, record);
+        return json(response, 200, { token, record });
+    }
 
-    request.pipe(proxyRequest);
+    const token = (request.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    const user = sessions.get(token);
+    const recordsMatch = apiPath.match(/^\/api\/collections\/([^/]+)\/records(?:\/([^/]+))?$/);
+    if (!recordsMatch) return json(response, 404, { code: 404, message: 'Not found.' });
+    const [, collection, recordId] = recordsMatch;
+    const isPublicInquiry = collection === 'inquiries' && request.method === 'POST';
+    if (!user && !isPublicInquiry) return json(response, 401, { code: 401, message: 'Authentication required.' });
+
+    const records = store.collections[collection] || [];
+    if (request.method === 'GET' && !recordId) {
+        return json(response, 200, { page: 1, perPage: records.length || 1, totalItems: records.length, totalPages: 1, items: records });
+    }
+    if (request.method === 'GET' && recordId) return json(response, 200, records.find((record) => record.id === recordId) || {});
+    const body = await parseBody(request);
+    if (request.method === 'POST') {
+        const record = { ...body, id: crypto.randomUUID(), created: new Date().toISOString(), updated: new Date().toISOString() };
+        store.collections[collection] = [...records, record];
+        saveStore();
+        return json(response, 200, record);
+    }
+    const index = records.findIndex((record) => record.id === recordId);
+    if (index < 0) return json(response, 404, { code: 404, message: 'Record not found.' });
+    if (request.method === 'PATCH' || request.method === 'PUT') {
+        const updated = { ...records[index], ...body, updated: new Date().toISOString() };
+        store.collections[collection][index] = updated;
+        saveStore();
+        return json(response, 200, updated);
+    }
+    if (request.method === 'DELETE') {
+        store.collections[collection].splice(index, 1);
+        saveStore();
+        return json(response, 204, {});
+    }
+    return json(response, 405, { code: 405, message: 'Method not allowed.' });
 }
 
 function resolvePublicFile(requestPath) {
@@ -101,7 +160,10 @@ function resolvePublicFile(requestPath) {
 
 const server = http.createServer((request, response) => {
     if (request.url.startsWith('/hcgi/platform')) {
-        proxyToPocketBase(request, response);
+        handleApi(request, response, new URL(request.url, `http://${request.headers.host || 'localhost'}`).pathname.replace('/hcgi/platform', '')).catch((error) => {
+            console.error(error);
+            json(response, 500, { code: 500, message: 'Backend request failed.' });
+        });
         return;
     }
 
