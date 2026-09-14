@@ -8,8 +8,15 @@ const PORT = Number(process.env.PORT || 8080);
 const POCKETBASE_PORT = Number(process.env.POCKETBASE_PORT || 8090);
 const PUBLIC_DIR = path.resolve(__dirname, '..', 'dist', 'apps', 'web');
 const POCKETBASE_ROOT = path.resolve(__dirname, '..', 'apps', 'pocketbase');
-const POCKETBASE_BINARY = process.env.POCKETBASE_BINARY;
-const POCKETBASE_DATA_DIR = process.env.POCKETBASE_DATA_DIR || path.resolve(POCKETBASE_ROOT, 'pb_data');
+const APPLICATION_ROOT = path.resolve(__dirname, '..');
+const configuredPocketbaseBinary = process.env.POCKETBASE_BINARY;
+const configuredPocketbaseDataDir = process.env.POCKETBASE_DATA_DIR;
+const POCKETBASE_BINARY = configuredPocketbaseBinary
+    ? path.resolve(APPLICATION_ROOT, configuredPocketbaseBinary)
+    : undefined;
+const POCKETBASE_DATA_DIR = configuredPocketbaseDataDir
+    ? path.resolve(APPLICATION_ROOT, configuredPocketbaseDataDir)
+    : path.resolve(POCKETBASE_ROOT, 'pb_data');
 
 if (!fs.existsSync(path.join(PUBLIC_DIR, 'index.html'))) {
     console.error(`Frontend build not found at ${PUBLIC_DIR}`);
