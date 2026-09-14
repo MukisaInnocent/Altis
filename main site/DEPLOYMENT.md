@@ -109,10 +109,10 @@ Use this flow when Hostinger is connected to the GitHub repository.
 
 - **Repository**: the GitHub repository containing this `main site` directory
 - **Root directory**: `main site`
-- **Build command**: `npm install && npm run build --prefix apps/web`
+- **Build command**: `npm install && npm run build`
 - **Output directory**: `dist/apps/web`
 - **Entry file**: `src/server.js`
-- **Start command**: `npm start`
+- **Start command**: `npm start` (builds the frontend before starting the server)
 - **Node.js**: 20 or newer
 - **Environment variable**: `VITE_POCKETBASE_URL=https://cms.altistravels.com`
 

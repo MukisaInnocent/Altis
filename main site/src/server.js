@@ -6,6 +6,11 @@ const { URL } = require('node:url');
 const PORT = Number(process.env.PORT || 8080);
 const PUBLIC_DIR = path.resolve(__dirname, '..', 'dist', 'apps', 'web');
 
+if (!fs.existsSync(path.join(PUBLIC_DIR, 'index.html'))) {
+    console.error(`Frontend build not found at ${PUBLIC_DIR}`);
+    process.exit(1);
+}
+
 const MIME_TYPES = {
     '.css': 'text/css; charset=utf-8',
     '.gif': 'image/gif',
@@ -74,5 +79,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Altis Voyage web server listening on port ${PORT}`);
+    console.log(`Altis Voyage web server listening on port ${PORT}; serving ${PUBLIC_DIR}`);
 });
