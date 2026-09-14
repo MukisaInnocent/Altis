@@ -2,8 +2,8 @@
 migrate((app) => {
     let settings = app.settings()
 
-    settings.meta.appName = "53ed381f-8906-46c3-b48f-9ffd2d8dd319.app-preview.com"
-    settings.meta.appURL = "https://53ed381f-8906-46c3-b48f-9ffd2d8dd319.app-preview.com/hcgi/platform"
+    settings.meta.appName = "Altis Voyage"
+    settings.meta.appURL = "https://altistravels.com/hcgi/platform"
     settings.meta.hideControls = true
 
     settings.logs.maxDays = 7
