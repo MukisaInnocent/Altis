@@ -121,7 +121,26 @@ async function handleApi(request, response, apiPath) {
 
     const records = store.collections[collection] || [];
     if (request.method === 'GET' && !recordId) {
-        return json(response, 200, { page: 1, perPage: records.length || 1, totalItems: records.length, totalPages: 1, items: records });
+        const requestUrl = new URL(request.url || '/', `http://${request.headers.host || 'localhost'}`);
+        const page = Math.max(1, Number(requestUrl.searchParams.get('page') || 1));
+        const perPage = Math.max(1, Number(requestUrl.searchParams.get('perPage') || 30));
+        const filter = requestUrl.searchParams.get('filter') || '';
+        const filtered = records.filter((record) => {
+            const keyMatch = filter.match(/key\s*=\s*["']([^"']+)["']/i);
+            if (keyMatch && record.key !== keyMatch[1]) return false;
+            const featuredMatch = filter.match(/featured\s*=\s*(true|false)/i);
+            if (featuredMatch && Boolean(record.featured) !== (featuredMatch[1].toLowerCase() === 'true')) return false;
+            return true;
+        });
+        const start = (page - 1) * perPage;
+        const items = filtered.slice(start, start + perPage);
+        return json(response, 200, {
+            page,
+            perPage,
+            totalItems: filtered.length,
+            totalPages: Math.max(1, Math.ceil(filtered.length / perPage)),
+            items,
+        });
     }
     if (request.method === 'GET' && recordId) return json(response, 200, records.find((record) => record.id === recordId) || {});
     const body = await parseBody(request);
