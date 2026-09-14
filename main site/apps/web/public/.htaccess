@@ -1,0 +1,7 @@
+RewriteEngine On
+
+# Let Vite serve static assets and send application routes to the SPA entry point.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+RewriteRule ^ index.html [L]
