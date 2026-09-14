@@ -109,7 +109,7 @@ Use this flow when Hostinger is connected to the GitHub repository.
 
 - **Repository**: the GitHub repository containing this `main site` directory
 - **Root directory**: `main site`
-- **Build command**: `npm install && npm run build`
+- **Build command**: `npm install && npm run build` (the `postinstall` hook also builds the frontend when Hostinger runs install only)
 - **Output directory**: `dist/apps/web`
 - **Entry file**: `src/server.js`
 - **Start command**: `npm start` (starts the server immediately; the build runs during the build phase)
