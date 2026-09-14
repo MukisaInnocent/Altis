@@ -115,8 +115,9 @@ async function handleApi(request, response, apiPath) {
     const recordsMatch = apiPath.match(/^\/api\/collections\/([^/]+)\/records(?:\/([^/]+))?$/);
     if (!recordsMatch) return json(response, 404, { code: 404, message: 'Not found.' });
     const [, collection, recordId] = recordsMatch;
+    const isPublicRead = request.method === 'GET' && collection !== 'inquiries';
     const isPublicInquiry = collection === 'inquiries' && request.method === 'POST';
-    if (!user && !isPublicInquiry) return json(response, 401, { code: 401, message: 'Authentication required.' });
+    if (!user && !isPublicRead && !isPublicInquiry) return json(response, 401, { code: 401, message: 'Authentication required.' });
 
     const records = store.collections[collection] || [];
     if (request.method === 'GET' && !recordId) {
