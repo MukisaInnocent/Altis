@@ -43,7 +43,7 @@ async function fetchJson(url, options = {}) {
 }
 
 async function loadData() {
-  const [contentData, destinations, packages, services, testimonials, gallery] = await Promise.all([
+  const responses = await Promise.allSettled([
     fetchJson('/api/content'),
     fetchJson('/api/destinations'),
     fetchJson('/api/packages'),
@@ -52,12 +52,23 @@ async function loadData() {
     fetchJson('/api/gallery')
   ]);
 
+  const failedRequests = responses.filter((response) => response.status === 'rejected');
+  const values = responses.map((response) => response.status === 'fulfilled' ? response.value : []);
+  const [contentData, destinations, packages, services, testimonials, gallery] = values;
   state.content = Object.fromEntries((contentData || []).map((item) => [item.key, item.value]));
   state.destinations = destinations || [];
   state.packages = packages || [];
   state.services = services || [];
   state.testimonials = testimonials || [];
   state.gallery = gallery || [];
+
+  if (failedRequests.length) {
+    const message = document.createElement('p');
+    message.className = 'site-data-warning';
+    message.textContent = 'Some travel data is temporarily unavailable. Please refresh or contact us directly.';
+    document.querySelector('main')?.prepend(message);
+    console.error('Data requests failed:', failedRequests.map((response) => response.reason));
+  }
 }
 
 function applyContent() {
