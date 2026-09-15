@@ -10,7 +10,7 @@ Start command: npm start
 Application port: use the PORT value provided by Hostinger
 ```
 
-Set these environment variables in Hostinger before the first start:
+Set these environment variables in Hostinger before the first start. The repository includes `.env.example` as a template; copy its names into Hostinger and replace the values there:
 
 ```text
 ADMIN_EMAIL=your-admin-email@example.com
