@@ -6,12 +6,14 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "start": "node db-seed.js && next start"
+    "start": "next start",
+    "seed": "node db-seed.js",
+    "postinstall": "node db-seed.js"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",
     "better-sqlite3": "11.10.0",
-    "next": "15.5.4",
+    "next": "15.5.25",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   }

@@ -3,8 +3,9 @@ import { getDb, ensureUser, upsertSiteContent } from './db.js';
 
 const db = getDb();
 
-const adminEmail = 'admin@altistravels.com';
-const adminPassword = 'admin123';
+const adminEmail = process.env.ADMIN_EMAIL || 'admin@altistravels.com';
+const adminPassword = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'admin123');
+if (!adminPassword) throw new Error('ADMIN_PASSWORD must be set in production');
 const passwordHash = bcrypt.hashSync(adminPassword, 10);
 ensureUser(adminEmail, passwordHash);
 
@@ -97,4 +98,4 @@ const gallerySeed = [
 const galleryInsert = db.prepare(`INSERT OR REPLACE INTO gallery (id, title, image, category, created_at, updated_at) VALUES (@id, @title, @image, @category, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`);
 gallerySeed.forEach((item, index) => galleryInsert.run({ ...item, id: index + 1 }));
 
-console.log('Seeded SQLite database for Altis Voyage. Admin login: admin@altistravels.com / admin123');
+console.log(`Seeded SQLite database for Altis Voyage. Admin login: ${adminEmail}`);
