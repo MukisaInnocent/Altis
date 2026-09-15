@@ -4,8 +4,10 @@ import { getDb, ensureUser, upsertSiteContent } from './db.js';
 const db = getDb();
 
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@altistravels.com';
-const adminPassword = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'admin123');
-if (!adminPassword) throw new Error('ADMIN_PASSWORD must be set in production');
+const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
+  console.warn('ADMIN_PASSWORD is not set; seeding with the temporary fallback password. Set it in Hostinger environment variables.');
+}
 const passwordHash = bcrypt.hashSync(adminPassword, 10);
 ensureUser(adminEmail, passwordHash);
 

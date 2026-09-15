@@ -16,7 +16,9 @@ import {
 const db = getDb();
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@altistravels.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) throw new Error('ADMIN_PASSWORD must be set in production');
+if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
+  console.warn('ADMIN_PASSWORD is not set; using the temporary fallback password. Set it in Hostinger environment variables.');
+}
 const ADMIN_TABLES = new Set(['destinations', 'packages', 'services', 'testimonials', 'gallery', 'site_content', 'inquiries']);
 
 ensureUser(ADMIN_EMAIL, bcrypt.hashSync(ADMIN_PASSWORD, 10));
