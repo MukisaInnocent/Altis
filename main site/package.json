@@ -4,12 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node --check src/server.js",
-    "dev": "node src/server.js",
-    "start": "node src/server.js"
+    "build": "next build",
+    "dev": "next dev",
+    "start": "node db-seed.js && next start"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",
-    "better-sqlite3": "11.10.0"
+    "better-sqlite3": "11.10.0",
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
   }
 }
