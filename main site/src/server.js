@@ -1,16 +1,15 @@
-import { spawn } from 'node:child_process';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import http from 'node:http';
+import next from 'next';
 
-const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-const server = spawn(npmCommand, ['start'], {
-	cwd: projectRoot,
-	env: process.env,
-	stdio: 'inherit'
-});
+const port = Number(process.env.PORT || 3000);
+const hostname = '0.0.0.0';
+const app = next({ dev: false, hostname, port });
+const handle = app.getRequestHandler();
 
-server.on('exit', (code, signal) => {
-	if (signal) process.kill(process.pid, signal);
-	process.exit(code ?? 1);
+await app.prepare();
+
+http.createServer((request, response) => {
+	handle(request, response);
+}).listen(port, hostname, () => {
+	console.log(`Altis Voyage Next.js server running on port ${port}`);
 });
