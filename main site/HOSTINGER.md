@@ -10,7 +10,7 @@ Start command: npm start
 Application port: use the PORT value provided by Hostinger
 ```
 
-If Hostinger shows a separate **Application startup file** field, set it to `hostinger-start.cjs`. Remove the old value `src/server.js`; that file belongs to the retired custom Node server and must not be used for this Next.js deployment. If Hostinger provides a start-command field, leave the startup file empty and use `npm start` instead.
+If Hostinger shows a separate **Application startup file** field, set it to `src/server.js` or `hostinger-start.cjs`. Both files now launch the Next.js app. If Hostinger provides a start-command field, use `npm start` instead.
 
 Set these environment variables in Hostinger before the first start. The repository includes `.env.example` as a template; copy its names into Hostinger and replace the values there:
 
