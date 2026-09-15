@@ -13,6 +13,18 @@ const currency = new Intl.NumberFormat('en-UG', {
   maximumFractionDigits: 0
 });
 
+const fallbackImage = 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80';
+
+function bindImageFallbacks() {
+  document.querySelectorAll('img').forEach((image) => {
+    const useFallback = () => {
+      if (image.src !== fallbackImage) image.src = fallbackImage;
+    };
+    image.addEventListener('error', useFallback, { once: true });
+    if (image.complete && image.naturalWidth === 0) useFallback();
+  });
+}
+
 function toCurrency(value) {
   const amount = Number(value || 0);
   return currency.format(amount);
@@ -61,7 +73,7 @@ function applyContent() {
 
   if (heroTitle) heroTitle.textContent = hero.title || 'From Uganda to the World';
   if (heroSubtitle) heroSubtitle.textContent = hero.subtitle || '';
-  if (heroImage) heroImage.src = hero.image || 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?auto=format&fit=crop&w=1200&q=80';
+  if (heroImage) heroImage.src = hero.image || fallbackImage;
   if (aboutHeading) aboutHeading.textContent = about.heading || 'A Ugandan agency with a global map';
   if (aboutBody) aboutBody.textContent = about.body || '';
 
@@ -431,6 +443,8 @@ async function setupPage() {
     renderGallery();
     renderTestimonials();
   }
+
+  bindImageFallbacks();
 }
 
 if (document.readyState === 'loading') {

@@ -91,7 +91,7 @@ const gallerySeed = [
   { title: 'The Nile through the gorge', image: 'https://images.hostinger.com/110ca975-1703-4f2e-8e46-ae84dd12453a.png', category: 'safari' },
   { title: 'Game drive, golden hour', image: 'https://images.hostinger.com/a1ba63e0-f1aa-46ed-a755-a27d54aaf866.png', category: 'safari' },
   { title: 'Migration crossing', image: 'https://images.hostinger.com/dc600f9c-f8f7-4e01-b02d-35ee144e5656.png', category: 'safari' },
-  { title: 'Kampala at dusk', image: 'https://images.hostinger.com/e142d7ac-36a1-49bf-85c3-42a150130b8d.png', category: 'city' },
+  { title: 'Kampala at dusk', image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=900&q=80', category: 'city' },
   { title: 'Blue hour in Dubai', image: 'https://images.hostinger.com/f6da86f0-b16c-43af-a1e8-976f2ad4df16.png', category: 'city' },
   { title: 'Dhow off Zanzibar', image: 'https://images.hostinger.com/7c37ccfb-ca26-4447-9cff-8d7ac49eb1a0.png', category: 'beach' },
   { title: 'Savanna suite', image: 'https://images.hostinger.com/2b609145-d692-466e-810d-089dd612da30.png', category: 'stays' }
