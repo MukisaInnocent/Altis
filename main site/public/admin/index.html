@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard — Altis Voyage</title>
+    <meta name="description" content="Manage destinations, packages, services, gallery, site content and inquiries." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bitter:wght@600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a href="/" class="brand" aria-label="Altis Voyage home">
+          <img src="/logo.jpg" alt="Altis Voyage" class="brand-logo" />
+        </a>
+        <a href="/" class="button secondary">View site</a>
+        <button id="admin-logout" class="cart-toggle" type="button">Logout</button>
+      </div>
+    </header>
+    <main class="section admin-dashboard">
+      <div class="container">
+        <p class="caption-num text-accent">Dashboard</p>
+        <h1 class="section-heading font-display">Content &amp; inquiries</h1>
+        <div id="admin-status" class="lede">Loading…</div>
+        <div class="dashboard-tabs">
+          <button class="tab-button active" type="button">Destinations</button>
+          <button class="tab-button" type="button">Packages</button>
+          <button class="tab-button" type="button">Services</button>
+          <button class="tab-button" type="button">Testimonials</button>
+          <button class="tab-button" type="button">Gallery</button>
+          <button class="tab-button" type="button">Site content</button>
+          <button class="tab-button" type="button">Inquiries</button>
+        </div>
+        <div id="admin-content" class="service-grid"></div>
+      </div>
+    </main>
+    <script src="/js/app.js"></script>
+  </body>
+</html>

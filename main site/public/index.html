@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Altis Voyage — Uganda Safaris & Worldwide Journeys</title>
+    <meta
+      name="description"
+      content="Uganda-based travel agency operating worldwide: gorilla safaris, international tours, visa assistance, flights, accommodation and full trip planning."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bitter:wght@600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a href="/" class="brand" aria-label="Altis Voyage home">
+          <img src="/logo.jpg" alt="Altis Voyage" class="brand-logo" />
+        </a>
+        <nav class="main-nav">
+          <a href="/">Home</a>
+          <a href="/destinations.html">Destinations</a>
+          <a href="/store.html">Tours &amp; Bookings</a>
+          <a href="/inquiry.html">Plan Your Trip</a>
+        </nav>
+        <button class="cart-toggle" type="button" aria-label="Open cart">Open cart</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section halftone">
+        <img id="hero-image" class="hero-image hero-drift" src="" alt="Altis Voyage hero" />
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+          <p class="caption-num">Est. Kampala · Operating worldwide</p>
+          <h1 id="hero-title" class="font-display hero-title">From Uganda to the World</h1>
+          <p id="hero-subtitle" class="hero-subtitle"></p>
+          <div class="hero-actions">
+            <a href="/destinations.html" class="button primary">Explore Destinations</a>
+            <a href="/inquiry.html" class="button secondary">Plan Your Trip</a>
+          </div>
+          <div class="stats-grid">
+            <div>
+              <p class="stat-number font-display">12+</p>
+              <p class="caption-num">Years operating</p>
+            </div>
+            <div>
+              <p class="stat-number font-display">4,800+</p>
+              <p class="caption-num">Travellers served</p>
+            </div>
+            <div>
+              <p class="stat-number font-display">40+</p>
+              <p class="caption-num">Destinations</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container intro-block">
+          <p class="caption-num text-accent">01 / Who we are</p>
+          <div>
+            <h2 id="about-heading" class="section-heading font-display">A Ugandan agency with a global map</h2>
+            <p id="about-body" class="lede"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt-panel">
+        <div class="container">
+          <div class="section-top">
+            <div>
+              <p class="caption-num text-accent">02 / Destinations</p>
+              <h2 class="section-heading font-display">Where we take you</h2>
+            </div>
+            <a href="/destinations.html" class="inline-link">All destinations</a>
+          </div>
+          <div id="featured-destinations" class="destination-grid"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-top">
+            <div>
+              <p class="caption-num text-accent">03 / Tour packages</p>
+              <h2 class="section-heading font-display">Signature journeys</h2>
+            </div>
+            <a href="/store.html" class="inline-link">Book &amp; pay online</a>
+          </div>
+          <div id="featured-packages" class="package-grid"></div>
+        </div>
+      </section>
+
+      <section class="section service-section">
+        <div class="container">
+          <p class="caption-num">04 / Services</p>
+          <h2 class="section-heading font-display">Everything between you and departure</h2>
+          <div id="services-list" class="service-grid"></div>
+          <p class="service-note">We prepare, review and submit every application with care. Visa approval is determined by the relevant authorities.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <p class="caption-num text-accent">05 / Field notes</p>
+          <h2 class="section-heading font-display">From recent journeys</h2>
+          <div id="gallery-grid" class="gallery-grid"></div>
+        </div>
+      </section>
+
+      <section class="section alt-panel">
+        <div class="container">
+          <p class="caption-num text-accent">06 / Travellers</p>
+          <h2 class="section-heading font-display">Word from the road</h2>
+          <div id="testimonials-list" class="testimonial-list"></div>
+        </div>
+      </section>
+
+      <section class="section inquiry-section">
+        <div class="container inquiry-wrap">
+          <div>
+            <p class="caption-num text-accent">07 / Start here</p>
+            <h2 class="section-heading font-display">Tell us where you're going</h2>
+            <p class="lede">
+              Send an inquiry and a consultant replies within one working day — with routes, dates,
+              honest prices and visa guidance. Prefer to book instantly?
+              <a href="/store.html" class="inline-link">Browse bookable tours &amp; consultations</a>.
+            </p>
+          </div>
+          <form id="homepage-inquiry-form" class="inquiry-form">
+            <div class="field-row">
+              <label>Full name *<input name="name" type="text" required /></label>
+              <label>Email *<input name="email" type="email" required /></label>
+            </div>
+            <div class="field-row">
+              <label>Phone / WhatsApp<input name="phone" type="text" /></label>
+              <label>I'm interested in
+                <select name="interest">
+                  <option>Uganda safari</option>
+                  <option>International travel</option>
+                  <option>Visa assistance</option>
+                  <option>Accommodation</option>
+                  <option>Full trip planning</option>
+                  <option>Something else</option>
+                </select>
+              </label>
+            </div>
+            <label>Your plans *<textarea name="message" rows="5" required></textarea></label>
+            <button class="button primary full-width" type="submit">Send inquiry</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <div class="brand small-brand">
+            <span class="brand-mark">Altis Voyage</span>
+          </div>
+          <p class="footer-copy">A Ugandan travel agency operating worldwide — safaris at home, journeys abroad, visas, flights and stays.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/destinations.html">Destinations</a></li>
+            <li><a href="/store.html">Tours &amp; Bookings</a></li>
+            <li><a href="/inquiry.html">Plan Your Trip</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li>+256 788 748 128</li>
+            <li>info@altistravels.com</li>
+            <li>Equatorial Mall, Level 3, Room 342, Bombo Road, Kampala, Uganda</li>
+            <li>Mon–Sat, 8:30–18:00 EAT</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Good to know</h4>
+          <p>We prepare and review every application carefully. Visa approval is determined by the relevant authorities.</p>
+        </div>
+      </div>
+      <div class="footer-bottom container">
+        <span>© 2026 Altis Voyage Travel Services Ltd. Kampala, Uganda.</span>
+        <a href="/admin/login.html">Staff sign in</a>
+      </div>
+    </footer>
+
+    <div id="cart-modal" class="cart-panel hidden"></div>
+    <script src="/js/app.js"></script>
+  </body>
+</html>
