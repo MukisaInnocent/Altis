@@ -19,12 +19,16 @@ ADMIN_EMAIL=your-admin-email@example.com
 ADMIN_PASSWORD=use-a-long-random-password
 DB_HOST=your-hostinger-mysql-host
 DB_PORT=3306
-DB_NAME=your-hostinger-database-name
-DB_USER=your-hostinger-database-user
+DB_NAME=u989298385_Altis
+DB_USER=u989298385_mukisa
 DB_PASSWORD=your-hostinger-database-password
 ```
 
+The Hostinger account prefix is required for both the database name and database username. The error `Access denied for user 'mukisa'` means the username is missing that prefix. Use the exact names shown in Hostinger; they are commonly `u989298385_Altis` and `u989298385_mukisa`.
+
 When `DB_HOST` is present, the application uses MySQL, creates the tables automatically, and seeds the database when the destinations table is empty. When `DB_HOST` is absent, it falls back to SQLite for local development. The MySQL application and database should use the same Hostinger account/region. The `uploads/` directory must be writable if media uploads are enabled later.
+
+Database access is intentionally not attempted during `npm install`. After correcting the environment variables, rebuild and restart the application; startup will then create the tables and seed the records. Rotate the database password if it has been shared anywhere outside Hostinger.
 
 After deployment, open `/admin/login.html` and sign in with the configured credentials. Do not use the local fallback credentials in production.
 

@@ -10,8 +10,7 @@
     "build": "next build",
     "dev": "next dev",
     "start": "node ensure-seeded.js && next start",
-    "seed": "node seed.js",
-    "postinstall": "node seed.js"
+    "seed": "node seed.js"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",
