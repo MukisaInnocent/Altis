@@ -19,7 +19,7 @@ ADMIN_EMAIL=your-admin-email@example.com
 ADMIN_PASSWORD=use-a-long-random-password
 ```
 
-The `postinstall` script creates the SQLite tables and initial content during `npm install`. The database is stored in `data/altis-voyage.sqlite`; make sure the `data/` directory is writable and persistent. The `uploads/` directory must also be writable if media uploads are enabled later.
+The `postinstall` script and application startup both initialize an empty SQLite database. Startup only seeds when the destinations table is empty, so normal restarts do not overwrite admin edits. The database is stored in `data/altis-voyage.sqlite`; make sure the `data/` directory is writable and persistent. The `uploads/` directory must also be writable if media uploads are enabled later.
 
 After deployment, open `/admin/login.html` and sign in with the configured credentials. Do not use the local fallback credentials in production.
 

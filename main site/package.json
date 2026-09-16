@@ -9,7 +9,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "start": "next start",
+    "start": "node ensure-seeded.js && next start",
     "seed": "node db-seed.js",
     "postinstall": "node db-seed.js"
   },
