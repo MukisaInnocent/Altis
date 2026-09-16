@@ -17,14 +17,14 @@ Set these environment variables in Hostinger before the first start. The reposit
 ```text
 ADMIN_EMAIL=your-admin-email@example.com
 ADMIN_PASSWORD=use-a-long-random-password
-DB_HOST=localhost
+DB_HOST=auth-db657.hstgr.io
 DB_PORT=3306
 DB_NAME=u989298385_Altis
 DB_USER=u989298385_mukisa
 DB_PASSWORD=your-hostinger-database-password
 ```
 
-For this deployment, start with `DB_HOST=localhost`; the app and MySQL database are on the same Hostinger server. If Hostinger's Node.js runtime cannot reach MySQL through localhost, change only `DB_HOST` to `auth-db657.hstgr.io`. The prefixed database and user names remain required: `u989298385_Altis` and `u989298385_mukisa`.
+Use `DB_HOST=auth-db657.hstgr.io`. The earlier `Access denied` response proved this is the reachable MySQL server. The prefixed database and user names remain required: `u989298385_Altis` and `u989298385_mukisa`.
 
 The Hostinger account prefix is required for both the database name and database username. The error `Access denied for user 'mukisa'` means the username is missing that prefix. Use the exact names shown in Hostinger; they are commonly `u989298385_Altis` and `u989298385_mukisa`.
 
