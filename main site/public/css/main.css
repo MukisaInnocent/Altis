@@ -248,7 +248,8 @@ button, input, textarea, select { font: inherit; }
   line-height: 1.7;
 }
 .gallery-grid img { aspect-ratio: 1; object-fit: cover; }
-.gallery-item figcaption { margin-top: 8px; color: var(--muted-foreground); }
+.gallery-item figcaption { display: grid; gap: 4px; margin-top: 10px; color: var(--foreground); }
+.gallery-item figcaption span { color: var(--muted-foreground); font-size: 0.78rem; }
 .testimonial { padding: 28px; }
 .testimonial .quote-mark { font-size: 2.25rem; color: var(--accent); }
 .testimonial footer { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -439,6 +440,34 @@ button, input, textarea, select { font: inherit; }
 .admin-dashboard .service-grid {
   margin-top: 18px;
 }
+.admin-panel {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.025);
+  padding: 22px;
+}
+.admin-panel-heading,
+.admin-record,
+.admin-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.admin-panel-heading h2 { margin: 4px 0 0; font-family: 'Bitter', serif; }
+.admin-loading { color: var(--muted-foreground); }
+.admin-editor { margin: 22px 0; padding: 18px; border: 1px solid var(--border); background: rgba(0,0,0,0.12); }
+.admin-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.admin-fields label { display: grid; gap: 7px; color: var(--muted-foreground); font-size: 0.78rem; font-weight: 700; text-transform: capitalize; }
+.admin-fields input, .admin-fields textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); background: var(--input); color: var(--foreground); resize: vertical; }
+.admin-fields label:nth-child(1), .admin-fields label:nth-child(5), .admin-fields label:nth-child(6) { grid-column: span 2; }
+.admin-form-actions { justify-content: flex-start; margin-top: 18px; }
+.admin-records { display: grid; gap: 10px; }
+.admin-record { padding: 14px 0; border-top: 1px solid var(--border); }
+.admin-record-summary { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; color: var(--muted-foreground); font-size: 0.82rem; }
+.admin-record-summary span { display: grid; gap: 2px; }
+.admin-record-summary b { color: var(--accent); font-size: 0.68rem; text-transform: uppercase; }
+.admin-record-actions { display: flex; gap: 8px; }
+.mini-button.danger { color: #ffb2a4; }
 
 .cart-panel {
   position: fixed;
@@ -540,6 +569,84 @@ button, input, textarea, select { font: inherit; }
     linear-gradient(currentColor, currentColor);
   background-size: 26px 2px, 2px 26px, 26px 2px, 2px 26px;
   background-position: top right, top right, bottom left, bottom left;
+}
+
+/* Altis Voyage brand direction: midnight navy, voyage gold, ocean teal, and white. */
+:root {
+  --background: #071a30;
+  --foreground: #f8f8f4;
+  --card: #0d2944;
+  --card-foreground: #f8f8f4;
+  --primary: #071a30;
+  --primary-foreground: #f8f8f4;
+  --secondary: #0b3445;
+  --secondary-foreground: #f8f8f4;
+  --muted: #7f9aac;
+  --muted-foreground: #c0d0d8;
+  --accent: #d9ad4f;
+  --accent-foreground: #071a30;
+  --destructive: #d26a59;
+  --border: rgba(248, 248, 244, 0.16);
+  --input: rgba(248, 248, 244, 0.06);
+  --brand-teal: #4aaeb0;
+}
+
+body {
+  background: var(--background);
+  background-image: linear-gradient(rgba(74, 174, 176, 0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(74, 174, 176, 0.045) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+.site-header {
+  background: rgba(7, 26, 48, 0.88);
+  border-bottom-color: rgba(248, 248, 244, 0.12);
+}
+.main-nav a { color: var(--foreground); }
+.main-nav a:hover, .inline-link:hover { color: var(--accent); }
+.cart-toggle { color: var(--foreground); border-color: var(--border); background: rgba(248, 248, 244, 0.04); }
+.hero-section { min-height: min(820px, 92vh); background: var(--primary); }
+.hero-image { filter: saturate(0.82) contrast(1.08); }
+.hero-overlay { background: linear-gradient(90deg, rgba(7,26,48,0.94), rgba(7,26,48,0.5) 55%, rgba(7,26,48,0.16)), linear-gradient(to top, rgba(7,26,48,0.88), transparent 48%); }
+.hero-content { padding-bottom: 72px; }
+.hero-title { max-width: 820px; font-size: clamp(3.1rem, 7vw, 7.2rem); animation: rise-in 0.8s ease both; }
+.hero-subtitle { animation: rise-in 0.8s 0.12s ease both; }
+.hero-actions { animation: rise-in 0.8s 0.2s ease both; }
+.hero-content::after { content: "Scroll to explore"; position: absolute; right: 0; bottom: 80px; writing-mode: vertical-rl; color: rgba(255,253,248,0.75); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; }
+.button { border-radius: 999px; transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease; }
+.button.primary { background: var(--accent); color: var(--accent-foreground); border-color: var(--accent); box-shadow: 0 10px 24px rgba(217,173,79,0.22); }
+.button.primary:hover { transform: translateY(-3px); box-shadow: 0 14px 28px rgba(217,173,79,0.3); }
+.button.secondary { border-color: rgba(255,253,248,0.7); }
+.section { padding: 104px 0; }
+.alt-panel { background: var(--secondary); border-color: rgba(74,174,176,0.2); }
+.section-heading { color: var(--foreground); }
+.section-intro { max-width: 690px; margin: 14px 0 28px; color: var(--muted-foreground); line-height: 1.75; }
+.destination-card, .package-card, .testimonial, .service-card, .inquiry-form, .info-card, .admin-panel { background: rgba(13,41,68,0.82); border-color: var(--border); box-shadow: 0 14px 34px rgba(0,0,0,0.18); }
+.destination-card, .package-card, .service-card, .testimonial { overflow: hidden; transition: transform 0.28s ease, box-shadow 0.28s ease; }
+.destination-card:hover, .package-card:hover, .service-card:hover, .testimonial:hover { transform: translateY(-6px); box-shadow: 0 20px 38px rgba(0,0,0,0.28); }
+.destination-card img, .package-card img { transition: transform 0.5s ease; }
+.destination-card:hover img, .package-card:hover img { transform: scale(1.04); }
+.service-grid .service-card { background: rgba(7,26,48,0.96); color: var(--primary-foreground); border-color: rgba(74,174,176,0.25); }
+.service-grid .service-card p { color: rgba(248,248,244,0.75); }
+.service-section { background: linear-gradient(135deg, rgba(11,52,69,0.8), rgba(7,26,48,0.35)); }
+.inquiry-section { background: #0b3445; }
+.inquiry-form input, .inquiry-form textarea, .inquiry-form select { background: rgba(248,248,244,0.06); color: var(--foreground); border-color: var(--border); }
+.site-footer { background: #041326; color: var(--primary-foreground); border-top: 0; }
+.footer-copy, .footer-grid ul, .footer-bottom { color: rgba(248,248,244,0.68); }
+.footer-bottom { border-top-color: rgba(248,248,244,0.18); }
+.gallery-item { overflow: hidden; }
+.gallery-item img { transition: transform 0.5s ease, filter 0.5s ease; filter: saturate(0.82); }
+.gallery-item:hover img { transform: scale(1.05); filter: saturate(1.1); }
+.hero-section + .section { position: relative; }
+.hero-section + .section::before { content: ""; position: absolute; top: -22px; right: 12%; width: 44px; height: 44px; border: 1px solid var(--brand-teal); border-radius: 50%; background: var(--background); }
+@keyframes rise-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-ready { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal-ready.is-visible { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 720px) {
+  .hero-content::after { display: none; }
+  .hero-title { font-size: clamp(2.8rem, 14vw, 4.4rem); }
+  .section { padding: 76px 0; }
+  .hero-section + .section::before { right: 8%; }
 }
 @keyframes hero-drift {
   from { transform: scale(1.04) translate(0, 0); }

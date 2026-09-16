@@ -25,6 +25,20 @@ function bindImageFallbacks() {
   });
 }
 
+function bindRevealMotion() {
+  const sections = document.querySelectorAll('main > section:not(.hero-section)');
+  if (!sections.length || !('IntersectionObserver' in window)) return;
+  sections.forEach((section) => section.classList.add('reveal-ready'));
+  const observer = new IntersectionObserver((entries, currentObserver) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      currentObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.14 });
+  sections.forEach((section) => observer.observe(section));
+}
+
 function toCurrency(value) {
   const amount = Number(value || 0);
   return currency.format(amount);
@@ -158,7 +172,7 @@ function renderGallery() {
   list.innerHTML = (state.gallery || []).slice(0, 6).map((item) => `
     <figure class="gallery-item">
       <img src="${item.image || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=900&q=80'}" alt="${item.title || 'Gallery'}" />
-      <figcaption>${item.title || 'Traveller shot'}</figcaption>
+      <figcaption><strong>${item.title || 'Traveller shot'}</strong><span>${item.category || 'Altis field note'} · On the road</span></figcaption>
     </figure>
   `).join('');
 }
@@ -344,6 +358,80 @@ async function setupAdminLogin() {
   });
 }
 
+const adminTableConfig = {
+  destinations: { label: 'Destinations', singular: 'Destination', fields: ['name', 'country', 'region', 'tagline', 'description', 'image', 'price_from', 'featured'] },
+  packages: { label: 'Packages', singular: 'Package', fields: ['title', 'destination', 'days', 'price', 'image', 'description', 'featured'] },
+  services: { label: 'Services', singular: 'Service', fields: ['title', 'summary', 'description', 'icon', 'image'] },
+  testimonials: { label: 'Testimonials', singular: 'Testimonial', fields: ['name', 'location', 'quote', 'trip', 'rating'] },
+  gallery: { label: 'Gallery', singular: 'Gallery item', fields: ['title', 'image', 'category'] },
+  site_content: { label: 'Site content', singular: 'Site content', fields: ['key', 'value'] },
+  inquiries: { label: 'Inquiries', singular: 'Inquiry', fields: ['name', 'email', 'phone', 'interest', 'message', 'status'] }
+};
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+}
+
+function adminFieldMarkup(field, value = '') {
+  const multiline = ['description', 'quote', 'message', 'value'].includes(field);
+  const type = ['price', 'price_from', 'days', 'rating'].includes(field) ? 'number' : field === 'image' ? 'url' : 'text';
+  const label = field.replaceAll('_', ' ');
+  const safeValue = escapeHtml(typeof value === 'object' ? JSON.stringify(value, null, 2) : value);
+  return `<label>${label}${multiline ? `<textarea name="${field}" rows="3">${safeValue}</textarea>` : `<input name="${field}" type="${type}" value="${safeValue}" ${field === 'key' ? 'required' : ''} />`}</label>`;
+}
+
+function adminRecordSummary(tableName, record) {
+  const config = adminTableConfig[tableName];
+  const fields = config.fields.filter((field) => field !== 'description' && field !== 'value');
+  return fields.slice(0, 3).map((field) => `<span><b>${escapeHtml(field.replaceAll('_', ' '))}</b>${escapeHtml(record[field] || '—')}</span>`).join('');
+}
+
+async function renderAdminTable(tableName, selectedRecord = null) {
+  const content = document.querySelector('#admin-content');
+  const config = adminTableConfig[tableName];
+  if (!content || !config) return;
+  content.innerHTML = '<p class="admin-loading">Loading records…</p>';
+  const records = await fetchJson(tableName === 'site_content' ? '/api/content' : `/api/admin/${tableName}`);
+  const editing = selectedRecord || {};
+  content.innerHTML = `
+    <section class="admin-panel">
+      <div class="admin-panel-heading"><div><p class="caption-num text-accent">${records.length} records</p><h2>${config.label}</h2></div><button class="button primary" type="button" data-admin-new>New ${config.singular}</button></div>
+      <form class="admin-editor ${selectedRecord ? '' : 'hidden'}" data-admin-form>
+        <input type="hidden" name="id" value="${escapeHtml(editing.id || '')}" />
+        <div class="admin-fields">${config.fields.map((field) => adminFieldMarkup(field, editing[field])).join('')}</div>
+        <div class="admin-form-actions"><button class="button primary" type="submit">${selectedRecord ? 'Save changes' : 'Create record'}</button><button class="button secondary" type="button" data-admin-cancel>Cancel</button></div>
+      </form>
+      <div class="admin-records">${records.length ? records.map((record) => `<article class="admin-record"><div><strong>#${record.id}</strong><div class="admin-record-summary">${adminRecordSummary(tableName, record)}</div></div><div class="admin-record-actions"><button class="mini-button" type="button" data-admin-edit="${record.id}">Edit</button><button class="mini-button danger" type="button" data-admin-delete="${record.id}">Delete</button></div></article>`).join('') : '<p class="lede">No records found.</p>'}</div>
+    </section>`;
+
+  content.querySelector('[data-admin-new]').addEventListener('click', () => renderAdminTable(tableName, {}));
+  content.querySelector('[data-admin-cancel]').addEventListener('click', () => renderAdminTable(tableName));
+  content.querySelectorAll('[data-admin-edit]').forEach((button) => button.addEventListener('click', () => {
+    const record = records.find((item) => Number(item.id) === Number(button.dataset.adminEdit));
+    renderAdminTable(tableName, record);
+  }));
+  content.querySelectorAll('[data-admin-delete]').forEach((button) => button.addEventListener('click', async () => {
+    if (!window.confirm('Delete this record? This cannot be undone.')) return;
+    await fetchJson(`/api/admin/${tableName}/${button.dataset.adminDelete}`, { method: 'DELETE' });
+    await renderAdminTable(tableName);
+  }));
+  const form = content.querySelector('[data-admin-form]');
+  if (form) form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = Object.fromEntries(new FormData(form).entries());
+    const id = formData.id;
+    delete formData.id;
+    ['price', 'price_from', 'days', 'rating', 'featured'].forEach((field) => {
+      if (field in formData && formData[field] !== '') formData[field] = Number(formData[field]);
+    });
+    if (tableName === 'site_content') {
+      try { formData.value = JSON.stringify(JSON.parse(formData.value)); } catch { /* Keep plain text content valid. */ }
+    }
+    await fetchJson(`/api/admin/${tableName}${id ? `/${id}` : ''}`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(formData) });
+    await renderAdminTable(tableName);
+  });
+}
+
 async function setupAdminDashboard() {
   try {
     const session = await fetchJson('/api/admin/session');
@@ -354,25 +442,15 @@ async function setupAdminDashboard() {
       return;
     }
     if (status) status.textContent = `Signed in as ${session.user.email}`;
-    const inquiries = await fetchJson('/api/admin/inquiries');
-    const destinationCount = (state.destinations || []).length;
-    if (content) {
-      content.innerHTML = `
-        <article class="service-card">
-          <h3>Inquiries</h3>
-          <p>${(inquiries || []).length} new or active requests</p>
-        </article>
-        <article class="service-card">
-          <h3>Destinations</h3>
-          <p>${destinationCount} destination entries</p>
-        </article>
-        <article class="service-card">
-          <h3>Quick actions</h3>
-          <p>Update content from the database tables in the migration project.</p>
-        </article>
-      `;
-    }
+    const tabs = document.querySelectorAll('[data-admin-tab]');
+    const selectTab = async (tableName) => {
+      tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.adminTab === tableName));
+      await renderAdminTable(tableName);
+    };
+    tabs.forEach((tab) => tab.addEventListener('click', () => selectTab(tab.dataset.adminTab)));
+    await selectTab('destinations');
   } catch (error) {
+    console.error('Admin dashboard failed:', error);
     window.location.href = '/admin/login.html';
   }
 
@@ -456,6 +534,7 @@ async function setupPage() {
   }
 
   bindImageFallbacks();
+  bindRevealMotion();
 }
 
 if (document.readyState === 'loading') {
