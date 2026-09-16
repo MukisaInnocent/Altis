@@ -1,20 +1,17 @@
-if (process.env.DB_HOST || process.env.DB_PASSWORD) {
-  const { initializeMysql, countRows } = await import('./mysql-db.js');
-  await initializeMysql();
-  if (await countRows('destinations') === 0) {
-    await import('./mysql-seed.js');
-    console.log('Initialized the empty MySQL database.');
-  } else {
-    console.log('MySQL database already contains data.');
-  }
-} else {
-  const { getDb } = await import('./db.js');
-  const db = getDb();
-  const destinationCount = db.prepare('SELECT COUNT(*) AS count FROM destinations').get().count;
-  if (destinationCount === 0) {
-    await import('./db-seed.js');
-    console.log('Initialized the empty SQLite database.');
-  } else {
-    console.log('SQLite database already contains data.');
-  }
+import { ensureDatabaseReady } from './bootstrap.js';
+import { describeDatabaseTarget } from './db-config.js';
+import { describeMysqlError } from './mysql-connection.js';
+
+try {
+  const report = await ensureDatabaseReady();
+  const seeded = report.seededTables.length > 0 ? report.seededTables.join(', ') : 'nothing new (already populated)';
+  console.log(`[db] ${report.driver} database ready. Seeded tables: ${seeded}. Admin account: ${report.adminEmail}`);
+} catch (error) {
+  const described = describeMysqlError(error);
+  const target = describeDatabaseTarget();
+
+  console.error(`[db] Database bootstrap failed (${described.code}): ${described.message}`);
+  if (described.hint) console.error(`[db] Hint: ${described.hint}`);
+  console.error(`[db] Active driver: ${target.driver}. Open /api/health for a full report.`);
+  console.error('[db] The web server will still start so the site stays reachable while you fix the database settings.');
 }

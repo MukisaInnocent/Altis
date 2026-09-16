@@ -61,3 +61,31 @@ temp/
 # Deployment staging
 deploy-staging/
 hostinger-deploy/
+# Next.js build output.
+# Committing this hides build failures: when `next build` breaks on the host, the stale
+# committed bundle keeps being served and the app silently runs old code.
+.next/
+out/
+
+# Local SQLite database and its WAL sidecar files.
+# On Hostinger the data lives in MySQL, so these must never ship.
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Runtime user uploads
+uploads/*
+!uploads/.gitkeep
+
+# Credential dumps.
+# A stray file named like "DB_HOST=auth-db123.hstgr.env" once leaked the live database
+# password into this repository. Keep blocking that pattern.
+.env
+.env.*
+!.env.example
+*DB_HOST*
+*DB_PASSWORD*
+*DB_USER*
+*DB_NAME*
+*auth-db*.env
