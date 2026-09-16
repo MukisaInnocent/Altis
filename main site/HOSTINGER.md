@@ -19,14 +19,15 @@ ADMIN_EMAIL=your-admin-email@example.com
 ADMIN_PASSWORD=use-a-long-random-password
 DB_HOST=auth-db657.hstgr.io
 DB_PORT=3306
-DB_NAME=u989298385_Altis
-DB_USER=u989298385_mukisa
+DB_ACCOUNT_PREFIX=u989298385
+DB_NAME=Altis
+DB_USER=mukisa
 DB_PASSWORD=your-hostinger-database-password
 ```
 
 Use `DB_HOST=auth-db657.hstgr.io`. The earlier `Access denied` response proved this is the reachable MySQL server. The prefixed database and user names remain required: `u989298385_Altis` and `u989298385_mukisa`.
 
-The Hostinger account prefix is required for both the database name and database username. The error `Access denied for user 'mukisa'` means the username is missing that prefix. Use the exact names shown in Hostinger; they are commonly `u989298385_Altis` and `u989298385_mukisa`.
+The app expands `DB_NAME=Altis` and `DB_USER=mukisa` to Hostinger's prefixed names `u989298385_Altis` and `u989298385_mukisa`. You can also enter the fully prefixed names directly.
 
 When `DB_HOST` is present, the application uses MySQL, creates the tables automatically, and seeds the database when the destinations table is empty. When `DB_HOST` is absent, it falls back to SQLite for local development. The MySQL application and database should use the same Hostinger account/region. The `uploads/` directory must be writable if media uploads are enabled later.
 

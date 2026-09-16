@@ -1,11 +1,15 @@
 import mysql from 'mysql2/promise';
 
+const hostingerPrefix = process.env.DB_ACCOUNT_PREFIX || 'u989298385';
+const configuredUser = process.env.DB_USER || 'mukisa';
+const configuredDatabase = process.env.DB_NAME || 'Altis';
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'auth-db657.hstgr.io',
   port: Number(process.env.DB_PORT || 3306),
-  user: process.env.DB_USER || 'u989298385_mukisa',
+  user: configuredUser.includes('_') ? configuredUser : `${hostingerPrefix}_${configuredUser}`,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'u989298385_Altis',
+  database: configuredDatabase.includes('_') ? configuredDatabase : `${hostingerPrefix}_${configuredDatabase}`,
   waitForConnections: true,
   connectionLimit: 5,
   queueLimit: 0,
