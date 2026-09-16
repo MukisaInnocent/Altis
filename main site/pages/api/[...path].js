@@ -1,27 +1,47 @@
 import bcrypt from 'bcryptjs';
-import {
-  getDb,
-  getSiteContent,
-  listSiteContent,
-  ensureUser,
-  getUserByEmail,
-  createSession,
-  getSessionUser,
-  clearSession,
-  saveJsonTable,
-  removeRecord,
-  updateJsonTable
+import sqliteDb, {
+  getSiteContent as getSqliteContent,
+  listSiteContent as listSqliteContent,
+  ensureUser as ensureSqliteUser,
+  getUserByEmail as getSqliteUser,
+  createSession as createSqliteSession,
+  getSessionUser as getSqliteSessionUser,
+  clearSession as clearSqliteSession,
+  saveJsonTable as saveSqliteRow,
+  removeRecord as removeSqliteRow,
+  updateJsonTable as updateSqliteRow
 } from '../../db.js';
 
-const db = getDb();
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@altistravels.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
-  console.warn('ADMIN_PASSWORD is not set; using the temporary fallback password. Set it in Hostinger environment variables.');
-}
-const ADMIN_TABLES = new Set(['destinations', 'packages', 'services', 'testimonials', 'gallery', 'site_content', 'inquiries']);
+const useMysql = Boolean(process.env.DB_HOST);
+const mysqlDb = useMysql ? await import('../../mysql-db.js') : null;
+if (useMysql) await mysqlDb.initializeMysql();
 
-ensureUser(ADMIN_EMAIL, bcrypt.hashSync(ADMIN_PASSWORD, 10));
+const adminEmail = process.env.ADMIN_EMAIL || 'admin@altistravels.com';
+const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+const adminTables = new Set(['destinations', 'packages', 'services', 'testimonials', 'gallery', 'site_content', 'inquiries']);
+
+if (useMysql) {
+  await mysqlDb.ensureUser(adminEmail, bcrypt.hashSync(adminPassword, 10));
+} else {
+  ensureSqliteUser(adminEmail, bcrypt.hashSync(adminPassword, 10));
+}
+
+async function listRows(tableName) {
+  return useMysql ? mysqlDb.listRows(tableName) : sqliteDb.prepare(`SELECT * FROM ${tableName} ORDER BY created_at DESC`).all();
+}
+
+async function getRow(tableName, id) {
+  return useMysql ? mysqlDb.getRow(tableName, id) : sqliteDb.prepare(`SELECT * FROM ${tableName} WHERE id = ?`).get(id);
+}
+
+async function getUserByEmail(email) {
+  return useMysql ? mysqlDb.getUserByEmail(email) : getSqliteUser(email);
+}
+
+async function getSessionUser(sessionId) {
+  if (!sessionId) return null;
+  return useMysql ? mysqlDb.getSessionUser(sessionId) : getSqliteSessionUser(sessionId);
+}
 
 function getSessionId(req) {
   const cookieHeader = req.headers.cookie || '';
@@ -29,14 +49,9 @@ function getSessionId(req) {
   return cookie ? cookie.trim().split('=').slice(1).join('=') : null;
 }
 
-function isAdmin(req) {
-  const id = getSessionId(req);
-  const user = id ? getSessionUser(id) : null;
+async function isAdmin(req) {
+  const user = await getSessionUser(getSessionId(req));
   return Boolean(user && user.role === 'admin');
-}
-
-function createSessionId() {
-  return `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
 }
 
 function sendError(res, status, message) {
@@ -49,21 +64,22 @@ export default async function handler(req, res) {
 
   if (resource === 'content') {
     if (!actionOrId) {
-      const rows = listSiteContent();
+      const rows = useMysql ? await mysqlDb.listSiteContent() : listSqliteContent();
       return res.status(200).json(rows.map((row) => ({ id: row.id, key: row.key, value: JSON.parse(row.value || '{}') })));
     }
-    const content = getSiteContent(actionOrId);
+    const content = useMysql ? await mysqlDb.getSiteContent(actionOrId) : getSqliteContent(actionOrId);
     return content ? res.status(200).json(content) : sendError(res, 404, 'Not found');
   }
 
   if (['destinations', 'packages', 'services', 'testimonials', 'gallery'].includes(resource) && req.method === 'GET') {
-    return res.status(200).json(db.prepare(`SELECT * FROM ${resource} ORDER BY created_at DESC`).all());
+    return res.status(200).json(await listRows(resource));
   }
 
   if (resource === 'inquiries' && req.method === 'POST') {
     const payload = req.body || {};
-    db.prepare('INSERT INTO inquiries (name, email, phone, interest, message, status) VALUES (?, ?, ?, ?, ?, ?)')
-      .run(payload.name || '', payload.email || '', payload.phone || '', payload.interest || '', payload.message || '', 'new');
+    const row = { name: payload.name || '', email: payload.email || '', phone: payload.phone || '', interest: payload.interest || '', message: payload.message || '', status: 'new' };
+    if (useMysql) await mysqlDb.insertRow('inquiries', row);
+    else sqliteDb.prepare('INSERT INTO inquiries (name, email, phone, interest, message, status) VALUES (?, ?, ?, ?, ?, ?)').run(row.name, row.email, row.phone, row.interest, row.message, row.status);
     return res.status(200).json({ success: true, message: 'Inquiry saved successfully' });
   }
 
@@ -71,44 +87,48 @@ export default async function handler(req, res) {
 
   if (actionOrId === 'login' && req.method === 'POST') {
     const payload = req.body || {};
-    const user = getUserByEmail(payload.email || '');
+    const user = await getUserByEmail(payload.email || '');
     if (!user || !bcrypt.compareSync(payload.password || '', user.password_hash)) return sendError(res, 401, 'Invalid credentials');
-    const id = createSessionId();
-    createSession(id, user.id);
-    res.setHeader('Set-Cookie', `altis_session=${id}; Path=/; HttpOnly; SameSite=Lax`);
+    const sessionId = `${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+    if (useMysql) await mysqlDb.createSession(sessionId, user.id); else createSqliteSession(sessionId, user.id);
+    res.setHeader('Set-Cookie', `altis_session=${sessionId}; Path=/; HttpOnly; SameSite=Lax`);
     return res.status(200).json({ success: true, user: { id: user.id, email: user.email, role: user.role } });
   }
 
   if (actionOrId === 'logout' && req.method === 'POST') {
-    const id = getSessionId(req);
-    if (id) clearSession(id);
+    const sessionId = getSessionId(req);
+    if (sessionId) {
+      if (useMysql) await mysqlDb.clearSession(sessionId);
+      else clearSqliteSession(sessionId);
+    }
     res.setHeader('Set-Cookie', 'altis_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
     return res.status(200).json({ success: true });
   }
 
   if (actionOrId === 'session' && req.method === 'GET') {
-    const id = getSessionId(req);
-    const user = id ? getSessionUser(id) : null;
+    const user = await getSessionUser(getSessionId(req));
     return user ? res.status(200).json({ user: { id: user.id, email: user.email, role: user.role } }) : sendError(res, 401, 'Unauthorized');
   }
 
   const tableName = actionOrId;
-  if (!isAdmin(req) || !ADMIN_TABLES.has(tableName)) return sendError(res, 401, 'Unauthorized');
+  if (!(await isAdmin(req)) || !adminTables.has(tableName)) return sendError(res, 401, 'Unauthorized');
 
   const id = segments[2] ? Number(segments[2]) : null;
-  if (req.method === 'GET') return res.status(200).json(db.prepare(`SELECT * FROM ${tableName} ORDER BY created_at DESC`).all());
+  if (req.method === 'GET') return res.status(200).json(await listRows(tableName));
   if (req.method === 'POST') {
-    const savedId = saveJsonTable(tableName, req.body || {});
-    return res.status(200).json(db.prepare(`SELECT * FROM ${tableName} WHERE id = ?`).get(savedId));
+    const savedId = useMysql ? await mysqlDb.insertRow(tableName, req.body || {}) : saveSqliteRow(tableName, req.body || {});
+    return res.status(200).json(await getRow(tableName, savedId));
   }
   if (req.method === 'PUT' && id) {
     const payload = { ...(req.body || {}) };
     delete payload.id;
-    updateJsonTable(tableName, id, payload);
-    return res.status(200).json(db.prepare(`SELECT * FROM ${tableName} WHERE id = ?`).get(id));
+    if (useMysql) await mysqlDb.updateRow(tableName, id, payload);
+    else updateSqliteRow(tableName, id, payload);
+    return res.status(200).json(await getRow(tableName, id));
   }
   if (req.method === 'DELETE' && id) {
-    removeRecord(tableName, id);
+    if (useMysql) await mysqlDb.deleteRow(tableName, id);
+    else removeSqliteRow(tableName, id);
     return res.status(200).json({ success: true });
   }
 

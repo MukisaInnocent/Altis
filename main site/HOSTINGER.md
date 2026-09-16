@@ -17,9 +17,14 @@ Set these environment variables in Hostinger before the first start. The reposit
 ```text
 ADMIN_EMAIL=your-admin-email@example.com
 ADMIN_PASSWORD=use-a-long-random-password
+DB_HOST=your-hostinger-mysql-host
+DB_PORT=3306
+DB_NAME=your-hostinger-database-name
+DB_USER=your-hostinger-database-user
+DB_PASSWORD=your-hostinger-database-password
 ```
 
-The `postinstall` script and application startup both initialize an empty SQLite database. Startup only seeds when the destinations table is empty, so normal restarts do not overwrite admin edits. The database is stored at `data/altis-voyage.sqlite` relative to the application root; make sure the `data/` directory is writable and persistent. The API and seed script intentionally use the application working directory so they share one database in a Next.js build. The `uploads/` directory must also be writable if media uploads are enabled later.
+When `DB_HOST` is present, the application uses MySQL, creates the tables automatically, and seeds the database when the destinations table is empty. When `DB_HOST` is absent, it falls back to SQLite for local development. The MySQL application and database should use the same Hostinger account/region. The `uploads/` directory must be writable if media uploads are enabled later.
 
 After deployment, open `/admin/login.html` and sign in with the configured credentials. Do not use the local fallback credentials in production.
 
