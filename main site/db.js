@@ -1,11 +1,8 @@
 import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dataDir = path.join(__dirname, 'data');
+const dataDir = path.resolve(process.env.DATA_DIR || path.join(process.cwd(), 'data'));
 const dbPath = path.join(dataDir, 'altis-voyage.sqlite');
 
 fs.mkdirSync(dataDir, { recursive: true });
