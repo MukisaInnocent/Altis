@@ -1,4 +1,4 @@
-if (process.env.DB_HOST) {
+if (process.env.DB_HOST || process.env.DB_PASSWORD) {
   const { initializeMysql, countRows } = await import('./mysql-db.js');
   await initializeMysql();
   if (await countRows('destinations') === 0) {

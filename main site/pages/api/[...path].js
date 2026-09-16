@@ -12,19 +12,12 @@ import sqliteDb, {
   updateJsonTable as updateSqliteRow
 } from '../../db.js';
 
-const useMysql = Boolean(process.env.DB_HOST);
+const useMysql = Boolean(process.env.DB_HOST || process.env.DB_PASSWORD);
 const mysqlDb = useMysql ? await import('../../mysql-db.js') : null;
-if (useMysql) await mysqlDb.initializeMysql();
 
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@altistravels.com';
 const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 const adminTables = new Set(['destinations', 'packages', 'services', 'testimonials', 'gallery', 'site_content', 'inquiries']);
-
-if (useMysql) {
-  await mysqlDb.ensureUser(adminEmail, bcrypt.hashSync(adminPassword, 10));
-} else {
-  ensureSqliteUser(adminEmail, bcrypt.hashSync(adminPassword, 10));
-}
 
 async function listRows(tableName) {
   return useMysql ? mysqlDb.listRows(tableName) : sqliteDb.prepare(`SELECT * FROM ${tableName} ORDER BY created_at DESC`).all();
@@ -59,6 +52,14 @@ function sendError(res, status, message) {
 }
 
 export default async function handler(req, res) {
+  try {
+    if (useMysql) {
+      await mysqlDb.initializeMysql();
+      await mysqlDb.ensureUser(adminEmail, bcrypt.hashSync(adminPassword, 10));
+    } else {
+      ensureSqliteUser(adminEmail, bcrypt.hashSync(adminPassword, 10));
+    }
+
   const segments = (req.query.path || []).map((segment) => decodeURIComponent(segment));
   const [resource, actionOrId] = segments;
 
@@ -133,4 +134,8 @@ export default async function handler(req, res) {
   }
 
   return sendError(res, 405, 'Method not allowed');
+  } catch (error) {
+    console.error('Database/API error:', error);
+    return res.status(503).json({ error: 'Database connection failed. Check Hostinger DB_HOST, DB_NAME, DB_USER, and DB_PASSWORD.' });
+  }
 }

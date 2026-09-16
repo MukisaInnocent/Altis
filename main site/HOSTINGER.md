@@ -24,6 +24,8 @@ DB_USER=u989298385_mukisa
 DB_PASSWORD=your-hostinger-database-password
 ```
 
+The current Hostinger defaults for this account are `auth-db657.hstgr.io`, `u989298385_Altis`, and `u989298385_mukisa`; set them explicitly in Hostinger even though the application has matching fallbacks. The password must be the current password for that prefixed MySQL user.
+
 The Hostinger account prefix is required for both the database name and database username. The error `Access denied for user 'mukisa'` means the username is missing that prefix. Use the exact names shown in Hostinger; they are commonly `u989298385_Altis` and `u989298385_mukisa`.
 
 When `DB_HOST` is present, the application uses MySQL, creates the tables automatically, and seeds the database when the destinations table is empty. When `DB_HOST` is absent, it falls back to SQLite for local development. The MySQL application and database should use the same Hostinger account/region. The `uploads/` directory must be writable if media uploads are enabled later.
