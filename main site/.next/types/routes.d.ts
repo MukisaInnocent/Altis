@@ -5,12 +5,11 @@ type AppRoutes = never
 type PageRoutes = never
 type LayoutRoutes = never
 type RedirectRoutes = never
-type RewriteRoutes = "/"
+type RewriteRoutes = never
 type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRoutes
 
 
 interface ParamMap {
-  "/": {}
 }
 
 

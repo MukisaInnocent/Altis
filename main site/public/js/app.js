@@ -116,7 +116,9 @@ function renderFeaturedDestinations() {
   const items = (state.destinations || []).slice(0, 3);
   list.innerHTML = items.map((item) => `
     <article class="destination-card">
-      <img src="${item.image || 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80'}" alt="${item.name}" />
+      <div class="card-img-wrapper">
+        <img src="${item.image || 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80'}" alt="${item.name}" />
+      </div>
       <div class="content">
         <div class="destination-meta">
           <span class="caption-num text-accent">${item.country || 'Uganda'}</span>
@@ -135,7 +137,9 @@ function renderFeaturedPackages() {
   const items = (state.packages || []).slice(0, 4);
   list.innerHTML = items.map((item) => `
     <article class="package-card">
-      <img src="${item.image || 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80'}" alt="${item.title}" />
+      <div class="card-img-wrapper">
+        <img src="${item.image || 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80'}" alt="${item.title}" />
+      </div>
       <div class="content">
         <span class="caption-num text-accent">${item.destination || 'Adventure'}</span>
         <h3>${item.title}</h3>
@@ -215,6 +219,7 @@ function renderCart() {
   if (!cartPanel) return;
   const items = JSON.parse(localStorage.getItem('altis-cart') || '[]');
   if (!items.length) {
+    document.querySelectorAll('.cart-toggle').forEach(btn => btn.textContent = `Cart (0)`);
     cartPanel.innerHTML = `
       <div class="cart-shell">
         <div class="cart-header"><h3>Cart</h3><button class="cart-close" data-close-cart>Close</button></div>
@@ -225,6 +230,8 @@ function renderCart() {
   }
 
   const total = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0);
+  const count = items.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
+  document.querySelectorAll('.cart-toggle').forEach(btn => btn.textContent = `Cart (${count})`);
   cartPanel.innerHTML = `
     <div class="cart-shell">
       <div class="cart-header"><h3>Cart</h3><button class="cart-close" data-close-cart>Close</button></div>
@@ -306,7 +313,9 @@ function renderDestinationsPage() {
 
   list.innerHTML = (filtered.length ? filtered : state.destinations || []).map((item) => `
     <article class="destination-card">
-      <img src="${item.image || 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80'}" alt="${item.name}" />
+      <div class="card-img-wrapper">
+        <img src="${item.image || 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80'}" alt="${item.name}" />
+      </div>
       <div class="content">
         <div class="destination-meta">
           <span class="caption-num text-accent">${item.country || 'Uganda'}</span>
@@ -324,7 +333,9 @@ function renderStorePage() {
   if (!list) return;
   list.innerHTML = (state.packages || []).map((item) => `
     <article class="package-card">
-      <img src="${item.image || 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80'}" alt="${item.title}" />
+      <div class="card-img-wrapper">
+        <img src="${item.image || 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80'}" alt="${item.title}" />
+      </div>
       <div class="content">
         <span class="caption-num text-accent">${item.destination || 'Adventure'}</span>
         <h3>${item.title}</h3>

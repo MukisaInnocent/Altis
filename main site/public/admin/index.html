@@ -9,34 +9,47 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bitter:wght@600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
   </head>
-  <body>
-    <header class="site-header">
-      <div class="container nav-wrap">
-        <a href="/" class="brand" aria-label="Altis Voyage home">
+  <body class="admin-body">
+    <div class="admin-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="admin-sidebar">
+        <a href="/" class="admin-brand" aria-label="Altis Voyage home">
           <img src="/logo.jpg" alt="Altis Voyage" class="brand-logo" />
         </a>
-        <a href="/" class="button secondary">View site</a>
-        <button id="admin-logout" class="cart-toggle" type="button">Logout</button>
-      </div>
-    </header>
-    <main class="section admin-dashboard">
-      <div class="container">
-        <p class="caption-num text-accent">Dashboard</p>
-        <h1 class="section-heading font-display">Content &amp; inquiries</h1>
-        <div id="admin-status" class="lede">Loading…</div>
-        <div class="dashboard-tabs">
-          <button class="tab-button active" type="button" data-admin-tab="destinations">Destinations</button>
-          <button class="tab-button" type="button" data-admin-tab="packages">Packages</button>
-          <button class="tab-button" type="button" data-admin-tab="services">Services</button>
-          <button class="tab-button" type="button" data-admin-tab="testimonials">Testimonials</button>
-          <button class="tab-button" type="button" data-admin-tab="gallery">Gallery</button>
-          <button class="tab-button" type="button" data-admin-tab="site_content">Site content</button>
-          <button class="tab-button" type="button" data-admin-tab="inquiries">Inquiries</button>
+        
+        <div id="admin-status" class="admin-status-text">Loading session…</div>
+        
+        <nav class="dashboard-nav">
+          <button class="nav-tab-button active" type="button" data-admin-tab="destinations">Destinations</button>
+          <button class="nav-tab-button" type="button" data-admin-tab="packages">Packages</button>
+          <button class="nav-tab-button" type="button" data-admin-tab="services">Services</button>
+          <button class="nav-tab-button" type="button" data-admin-tab="testimonials">Testimonials</button>
+          <button class="nav-tab-button" type="button" data-admin-tab="gallery">Gallery</button>
+          <button class="nav-tab-button" type="button" data-admin-tab="site_content">Site content</button>
+          <button class="nav-tab-button" type="button" data-admin-tab="inquiries">Inquiries</button>
+        </nav>
+        
+        <div class="admin-sidebar-footer">
+           <button id="admin-logout" class="button secondary full-width btn-modern" type="button">Sign Out</button>
+           <a href="/" class="back-link">← View Public Site</a>
         </div>
-        <div id="admin-content" class="service-grid"></div>
-      </div>
-    </main>
+      </aside>
+      
+      <!-- Main Content Area -->
+      <main class="admin-main">
+        <header class="admin-header">
+           <p class="caption-num text-accent">Dashboard</p>
+           <h1 class="font-display">Content Management</h1>
+        </header>
+        
+        <div class="admin-content-wrapper">
+           <div id="admin-content"></div>
+        </div>
+      </main>
+    </div>
+    
     <script src="/js/app.js"></script>
   </body>
 </html>
