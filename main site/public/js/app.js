@@ -477,11 +477,42 @@ async function setupAdminDashboard() {
 function bindMobileMenu() {
   const toggle = document.querySelector('.mobile-menu-toggle');
   const nav = document.querySelector('.main-nav');
-  if (toggle && nav) {
-    toggle.addEventListener('click', () => {
-      nav.classList.toggle('is-open');
-    });
+  const overlay = document.querySelector('#nav-overlay');
+  if (!toggle || !nav) return;
+
+  function openMenu() {
+    nav.classList.add('is-open');
+    if (overlay) overlay.classList.add('is-open');
+    toggle.textContent = '✕';
+    toggle.setAttribute('aria-label', 'Close Menu');
+    document.body.style.overflow = 'hidden';
   }
+
+  function closeMenu() {
+    nav.classList.remove('is-open');
+    if (overlay) overlay.classList.remove('is-open');
+    toggle.textContent = '☰';
+    toggle.setAttribute('aria-label', 'Open Menu');
+    document.body.style.overflow = '';
+  }
+
+  toggle.addEventListener('click', () => {
+    nav.classList.contains('is-open') ? closeMenu() : openMenu();
+  });
+
+  if (overlay) overlay.addEventListener('click', closeMenu);
+
+  // Close button inside the drawer
+  const closeBtn = nav.querySelector('.nav-close-btn');
+  if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+
+  // Close when a nav link is tapped
+  nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
 }
 
 async function setupHomePage() {
@@ -493,6 +524,7 @@ async function setupHomePage() {
   renderGallery();
   renderTestimonials();
   bindCartButton();
+  bindMobileMenu();
   renderCart();
   bindInquiryForm('#homepage-inquiry-form');
 }

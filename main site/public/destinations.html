@@ -17,8 +17,9 @@
           <img src="/logo.jpg" alt="Altis Voyage" class="brand-logo" />
         </a>
         <nav class="main-nav">
+          <button class="nav-close-btn" type="button" aria-label="Close Menu">✕</button>
           <a href="/">Home</a>
-          <a href="/destinations.html">Destinations</a>
+          <a href="/destinations.html" class="nav-active">Destinations</a>
           <a href="/store.html">Tours &amp; Bookings</a>
           <a href="/inquiry.html">Plan Your Trip</a>
         </nav>
@@ -30,11 +31,20 @@
     </header>
 
     <main>
-      <section class="section alt-panel">
+      <!-- Page Hero -->
+      <section class="page-hero">
+        <div class="page-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1920&q=80');"></div>
+        <div class="page-hero-overlay"></div>
+        <div class="container page-hero-content">
+          <p class="caption-num text-accent">Where we go</p>
+          <h1 class="font-display page-hero-title">The map, our way</h1>
+          <p class="page-hero-sub">From gorilla highlands to Gulf skylines. Every journey includes planning, documentation guidance and on-the-ground support.</p>
+        </div>
+      </section>
+
+      <!-- Destinations List -->
+      <section class="section">
         <div class="container">
-          <p class="caption-num text-accent">Destinations</p>
-          <h1 class="section-heading font-display">The map, our way</h1>
-          <p class="lede">From gorilla highlands to Gulf skylines. Filter by region or search — every journey includes planning, documentation guidance and support while you travel.</p>
           <div class="destinations-toolbar">
             <div class="region-tabs" aria-label="Destination regions">
               <button class="region-pill active" type="button" data-region="all">All</button>
@@ -47,15 +57,60 @@
           <div id="destinations-page-list" class="destination-grid"></div>
         </div>
       </section>
+
+      <!-- CTA Band -->
+      <section class="cta-band">
+        <div class="container cta-inner">
+          <div>
+            <p class="caption-num">Ready to go?</p>
+            <h2 class="font-display">Let's plan your trip together</h2>
+          </div>
+          <div class="cta-actions">
+            <a href="/inquiry.html" class="button primary">Send an inquiry</a>
+            <a href="/store.html" class="button secondary">Browse bookable tours</a>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
-      <div class="container footer-bottom">
-        <span>© 2026 Altis Voyage</span>
+      <div class="container footer-grid">
+        <div>
+          <div class="brand small-brand">
+            <span class="brand-mark">Altis Voyage</span>
+          </div>
+          <p class="footer-copy">A Ugandan travel agency operating worldwide — safaris at home, journeys abroad, visas, flights and stays.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/destinations.html">Destinations</a></li>
+            <li><a href="/store.html">Tours &amp; Bookings</a></li>
+            <li><a href="/inquiry.html">Plan Your Trip</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li>+256 788 748 128</li>
+            <li>info@altistravels.com</li>
+            <li>Equatorial Mall, Level 3, Room 342, Bombo Road, Kampala</li>
+            <li>Mon–Sat, 8:30–18:00 EAT</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Good to know</h4>
+          <p>We prepare and review every application carefully. Visa approval is determined by the relevant authorities.</p>
+        </div>
+      </div>
+      <div class="footer-bottom container">
+        <span>© 2026 Altis Voyage Travel Services Ltd. Kampala, Uganda.</span>
         <a href="/admin/login.html">Staff sign in</a>
       </div>
     </footer>
 
+    <div id="nav-overlay" class="nav-overlay"></div>
     <div id="cart-modal" class="cart-panel hidden"></div>
     <script src="/js/app.js"></script>
   </body>

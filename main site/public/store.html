@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tour Packages — Altis Voyage</title>
+    <title>Tour Packages &amp; Bookings — Altis Voyage</title>
     <meta name="description" content="Book tours, safaris and travel consultations online. Pick a date and time for appointments and pay securely." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,9 +17,10 @@
           <img src="/logo.jpg" alt="Altis Voyage" class="brand-logo" />
         </a>
         <nav class="main-nav">
+          <button class="nav-close-btn" type="button" aria-label="Close Menu">✕</button>
           <a href="/">Home</a>
           <a href="/destinations.html">Destinations</a>
-          <a href="/store.html">Tours &amp; Bookings</a>
+          <a href="/store.html" class="nav-active">Tours &amp; Bookings</a>
           <a href="/inquiry.html">Plan Your Trip</a>
         </nav>
         <div class="header-actions">
@@ -30,23 +31,77 @@
     </header>
 
     <main>
+      <!-- Page Hero -->
+      <section class="page-hero">
+        <div class="page-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80');"></div>
+        <div class="page-hero-overlay"></div>
+        <div class="container page-hero-content">
+          <p class="caption-num text-accent">Tours &amp; bookings</p>
+          <h1 class="font-display page-hero-title">Book it. Pay for it. Go.</h1>
+          <p class="page-hero-sub">Tours, safaris and one-to-one travel consultations — bookable online with secure payment. Appointments let you pick an exact date and time at checkout.</p>
+        </div>
+      </section>
+
+      <!-- Store Packages -->
       <section class="section">
         <div class="container">
-          <p class="caption-num text-accent">Tours &amp; bookings</p>
-          <h1 class="section-heading font-display">Book it. Pay for it. Go.</h1>
-          <p class="lede">Tours, safaris and one-to-one travel consultations — bookable online with secure payment. Appointments let you pick an exact date and time at checkout.</p>
           <div id="store-page-list" class="package-grid"></div>
+        </div>
+      </section>
+
+      <!-- CTA Band -->
+      <section class="cta-band">
+        <div class="container cta-inner">
+          <div>
+            <p class="caption-num">Can't find what you need?</p>
+            <h2 class="font-display">We build fully custom itineraries</h2>
+          </div>
+          <div class="cta-actions">
+            <a href="/inquiry.html" class="button primary">Send an inquiry</a>
+            <a href="/destinations.html" class="button secondary">Browse destinations</a>
+          </div>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <div class="container footer-bottom">
-        <span>© 2026 Altis Voyage</span>
+      <div class="container footer-grid">
+        <div>
+          <div class="brand small-brand">
+            <span class="brand-mark">Altis Voyage</span>
+          </div>
+          <p class="footer-copy">A Ugandan travel agency operating worldwide — safaris at home, journeys abroad, visas, flights and stays.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/destinations.html">Destinations</a></li>
+            <li><a href="/store.html">Tours &amp; Bookings</a></li>
+            <li><a href="/inquiry.html">Plan Your Trip</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li>+256 788 748 128</li>
+            <li>info@altistravels.com</li>
+            <li>Equatorial Mall, Level 3, Room 342, Bombo Road, Kampala</li>
+            <li>Mon–Sat, 8:30–18:00 EAT</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Good to know</h4>
+          <p>We prepare and review every application carefully. Visa approval is determined by the relevant authorities.</p>
+        </div>
+      </div>
+      <div class="footer-bottom container">
+        <span>© 2026 Altis Voyage Travel Services Ltd. Kampala, Uganda.</span>
         <a href="/admin/login.html">Staff sign in</a>
       </div>
     </footer>
 
+    <div id="nav-overlay" class="nav-overlay"></div>
     <div id="cart-modal" class="cart-panel hidden"></div>
     <script src="/js/app.js"></script>
   </body>
