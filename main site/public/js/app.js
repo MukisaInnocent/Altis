@@ -16,13 +16,14 @@ const currency = new Intl.NumberFormat('en-UG', {
 const fallbackImage = 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80';
 
 function bindImageFallbacks() {
-  document.querySelectorAll('img').forEach((image) => {
-    const useFallback = () => {
-      if (image.src !== fallbackImage) image.src = fallbackImage;
-    };
-    image.addEventListener('error', useFallback, { once: true });
-    if (image.complete && image.naturalWidth === 0) useFallback();
-  });
+  document.addEventListener('error', (event) => {
+    const target = event.target;
+    if (target && target.tagName === 'IMG') {
+      if (target.src !== fallbackImage) {
+        target.src = fallbackImage;
+      }
+    }
+  }, true);
 }
 
 function bindRevealMotion() {
