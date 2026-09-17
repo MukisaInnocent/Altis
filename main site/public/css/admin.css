@@ -147,36 +147,45 @@ body.admin-body {
 
 .admin-sidebar {
   width: var(--admin-sidebar-width);
-  background: var(--admin-glass-bg);
+  background: rgba(7, 26, 48, 0.7);
   backdrop-filter: blur(var(--admin-glass-blur));
   -webkit-backdrop-filter: blur(var(--admin-glass-blur));
   border-right: 1px solid var(--admin-glass-border);
   display: flex;
   flex-direction: column;
-  padding: 32px 24px;
+  padding: 24px 20px;
   z-index: 10;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.2);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.4);
 }
 
 .admin-brand {
-  margin-bottom: 40px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--admin-glass-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .admin-brand img {
-  height: 48px;
+  height: 56px;
+  object-fit: contain;
+  mix-blend-mode: lighten;
+  filter: brightness(1.15) contrast(1.1);
 }
 
 .admin-status-text {
   font-size: 0.8rem;
   color: var(--brand-teal);
   background: rgba(74, 174, 176, 0.1);
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-bottom: 24px;
+  padding: 10px 14px;
+  border-radius: 8px;
   border: 1px solid rgba(74, 174, 176, 0.2);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  margin-bottom: 16px;
 }
 
 .admin-status-text::before {
@@ -192,7 +201,7 @@ body.admin-body {
 .dashboard-nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   flex: 1;
 }
 
@@ -200,26 +209,46 @@ body.admin-body {
   background: transparent;
   border: 1px solid transparent;
   color: var(--muted-foreground);
-  padding: 14px 16px;
+  padding: 12px 16px;
   text-align: left;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-tab-button::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .nav-tab-button:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--foreground);
 }
 
+.nav-tab-button.active::before {
+  opacity: 1;
+}
+
 .nav-tab-button.active {
-  background: var(--accent);
-  color: var(--accent-foreground);
-  box-shadow: 0 4px 12px rgba(217, 173, 79, 0.2);
+  background: linear-gradient(90deg, rgba(217, 173, 79, 0.1), transparent);
+  color: var(--foreground);
+  border-color: rgba(217, 173, 79, 0.15);
+  font-weight: 600;
 }
 
 .admin-sidebar-footer {

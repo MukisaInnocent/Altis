@@ -474,6 +474,16 @@ async function setupAdminDashboard() {
   }
 }
 
+function bindMobileMenu() {
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  const nav = document.querySelector('.main-nav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      nav.classList.toggle('is-open');
+    });
+  }
+}
+
 async function setupHomePage() {
   await loadData();
   applyContent();
@@ -489,6 +499,7 @@ async function setupHomePage() {
 
 async function setupPage() {
   bindCartButton();
+  bindMobileMenu();
   renderCart();
 
   const search = document.querySelector('#destination-search');
