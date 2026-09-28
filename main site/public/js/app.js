@@ -219,8 +219,10 @@ function renderCart() {
   const cartPanel = document.querySelector('#cart-modal');
   if (!cartPanel) return;
   const items = JSON.parse(localStorage.getItem('altis-cart') || '[]');
+  const cartIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:6px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`;
+
   if (!items.length) {
-    document.querySelectorAll('.cart-toggle').forEach(btn => btn.textContent = `Cart (0)`);
+    document.querySelectorAll('.cart-toggle').forEach(btn => btn.innerHTML = `${cartIcon}<span style="vertical-align:middle;">(0)</span>`);
     cartPanel.innerHTML = `
       <div class="cart-shell">
         <div class="cart-header"><h3>Cart</h3><button class="cart-close" data-close-cart>Close</button></div>
@@ -232,7 +234,7 @@ function renderCart() {
 
   const total = items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0);
   const count = items.reduce((sum, item) => sum + Number(item.quantity || 1), 0);
-  document.querySelectorAll('.cart-toggle').forEach(btn => btn.textContent = `Cart (${count})`);
+  document.querySelectorAll('.cart-toggle').forEach(btn => btn.innerHTML = `${cartIcon}<span style="vertical-align:middle;">(${count})</span>`);
   cartPanel.innerHTML = `
     <div class="cart-shell">
       <div class="cart-header"><h3>Cart</h3><button class="cart-close" data-close-cart>Close</button></div>

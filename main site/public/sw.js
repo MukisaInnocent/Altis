@@ -9,13 +9,17 @@ const ASSETS = [
   '/css/admin.css',
   '/js/app.js',
   '/logo.jpg',
+  '/icon.svg',
   '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+      // Fetch each asset individually so a single 404 doesn't block installation
+      return Promise.allSettled(
+        ASSETS.map((url) => cache.add(url).catch((err) => console.warn(`SW: Failed to cache ${url}`, err)))
+      );
     })
   );
 });

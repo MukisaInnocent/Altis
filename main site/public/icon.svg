@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#071a30"/>
+  <circle cx="256" cy="256" r="200" stroke="#d9ad4f" stroke-width="24" fill="none"/>
+  <text x="50%" y="50%" font-family="sans-serif" font-weight="bold" font-size="160" fill="#d9ad4f" dominant-baseline="central" text-anchor="middle">AV</text>
+</svg>

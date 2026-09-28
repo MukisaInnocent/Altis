@@ -846,9 +846,11 @@ button, input, textarea, select { font: inherit; outline: none; border: none; }
    RESPONSIVE DESIGN
 ========================================= */
 @media (max-width: 980px) {
-  .destination-grid, .package-grid, .service-grid, .gallery-grid,
-  .testimonial-list, .inquiry-wrap, .intro-block {
+  .package-grid, .testimonial-list, .inquiry-wrap, .intro-block {
     grid-template-columns: 1fr;
+  }
+  .destination-grid, .service-grid, .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
   .package-card { flex-direction: column; }
   .package-card .card-img-wrapper { width: 100%; height: 280px; }
@@ -960,11 +962,15 @@ button, input, textarea, select { font: inherit; outline: none; border: none; }
   .hero-title { font-size: clamp(2.5rem, 12vw, 3.5rem); }
   .stats-grid { grid-template-columns: 1fr; gap: 16px; margin-top: 40px; }
   .section { padding: 80px 0; }
-  .footer-grid, .field-row { grid-template-columns: 1fr; }
+  .section-top { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .footer-grid, .field-row, .destination-grid, .service-grid, .gallery-grid { grid-template-columns: 1fr; }
   .inquiry-form { padding: 32px 24px; }
   .cart-shell { padding: 24px; }
   .cta-band { padding: 60px 0; }
   .page-hero { min-height: 35vh; }
+  .brand-logo { max-width: 140px; height: 36px; }
+  .cart-toggle { padding: 8px 12px; }
+  .cart-toggle span { display: none; }
 }
 
 @keyframes hero-drift {
