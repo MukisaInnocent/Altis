@@ -1,6 +1,7 @@
 import mysql from 'mysql2/promise';
 import { getMissingMysqlSettings, getMysqlConfig } from './db-config.js';
 import { SCHEMA_STATEMENTS } from './mysql-schema.js';
+import { applyMysqlMigrations } from './schema-migrations.js';
 
 const CONNECT_TIMEOUT_MS = 15000;
 const CONNECTION_LIMIT = 5;
@@ -47,7 +48,10 @@ function createPool(config) {
     queueLimit: 0,
     charset: 'utf8mb4',
     connectTimeout: CONNECT_TIMEOUT_MS,
-    enableKeepAlive: true
+    enableKeepAlive: true,
+    // DATE columns (offer validity, deadlines) must come back exactly as stored, not shifted by
+    // the server timezone into a JavaScript Date.
+    dateStrings: true
   });
 }
 
@@ -93,8 +97,10 @@ async function bootstrap() {
 
   const created = createPool(config);
 
+  let migratedColumns = [];
   try {
     await Promise.all(SCHEMA_STATEMENTS.map((statement) => created.query(statement)));
+    migratedColumns = await applyMysqlMigrations(created);
   } catch (error) {
     await created.end().catch(() => {});
     throw error;
@@ -106,11 +112,12 @@ async function bootstrap() {
     user: config.user,
     host: config.host,
     databaseStep,
-    tables: SCHEMA_STATEMENTS.length
+    tables: SCHEMA_STATEMENTS.length,
+    migratedColumns
   };
 
   console.log(
-    `[db] MySQL ready - host=${config.host} database=${config.database} user=${config.user} tables=${SCHEMA_STATEMENTS.length} (${databaseStep})`
+    `[db] MySQL ready - host=${config.host} database=${config.database} user=${config.user} tables=${SCHEMA_STATEMENTS.length} (${databaseStep})${migratedColumns.length ? ` added columns: ${migratedColumns.join(', ')}` : ''}`
   );
 
   return created;

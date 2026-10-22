@@ -2,42 +2,69 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-    <title>Staff Sign In — Altis Voyage</title>
-    <meta name="description" content="Administrator sign in for the Altis Voyage content dashboard." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staff Sign In | Altis Voyage</title>
+    <meta name="description" content="Staff sign in for the Altis Voyage dashboard." />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#060f1e" />
+    <script>(function(){try{var t=localStorage.getItem('altis-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}document.documentElement.setAttribute('data-theme',t);var m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='light'?'#f6f3ec':'#060f1e'}catch(e){}})()</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bitter:wght@600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/admin.css" />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#071a30" />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Manrope:wght@400..800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/main.css?v=20261024" />
+    <link rel="stylesheet" href="/css/admin.css?v=20261024" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/logo.jpg" />
   </head>
-  <body class="admin-body">
-    <main class="admin-login-wrapper">
-      <div class="login-glass-card">
-        <div class="login-brand-logo">
-          <img src="/logo.jpg" alt="Altis Voyage" class="brand-logo" />
+  <body class="adm adm-login-page">
+    <main class="lg">
+      <section class="lg-brand" aria-label="Altis Voyage staff portal">
+        <div class="lg-orbs" aria-hidden="true"><span></span><span></span></div>
+        <a class="lg-logo" href="/" aria-label="Altis Voyage website">
+          <img src="/logo-header.jpg" alt="Altis Voyage Travel" width="233" height="96" />
+        </a>
+        <div class="lg-copy">
+          <p class="adm-eyebrow">Staff portal</p>
+          <h1 class="font-display">Everything for your travellers, in one place.</h1>
+          <ul class="lg-points">
+            <li><span><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>Answer enquiries and move quotations forward</li>
+            <li><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.42l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42z"/></svg></span>Publish offers, articles and scholarships</li>
+            <li><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>Keep contact details and policies accurate</li>
+          </ul>
         </div>
-        <h1 class="font-display">Welcome Back</h1>
-        <p class="login-subtitle">Sign in to manage the Altis Voyage platform</p>
-        
-        <form id="admin-login-form" class="admin-form">
-          <div class="input-group">
-            <label>Email Address</label>
-            <input name="email" type="email" required value="admin@altistravels.com" placeholder="Enter your email" />
-          </div>
-          <div class="input-group">
-            <label>Password</label>
-            <input name="password" type="password" required placeholder="Enter your password" />
-          </div>
-          <button class="button primary full-width btn-modern" type="submit">Sign In to Dashboard</button>
-        </form>
-        
-        <a href="/" class="back-link">← Return to public site</a>
-      </div>
+        <p class="lg-foot">© Altis Voyage Travel Services Ltd · Kampala, Uganda</p>
+      </section>
+
+      <section class="lg-panel">
+        <button class="adm-icon-btn lg-theme" type="button" data-theme-toggle aria-label="Switch colour theme" title="Switch colour theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+        <div class="lg-card">
+          <h2 class="font-display">Welcome back</h2>
+          <p class="lg-sub">Sign in with your staff account to manage the website.</p>
+          <p class="lg-alert" id="lg-alert" role="alert" hidden></p>
+          <form id="admin-login-form" novalidate>
+            <label class="adm-field">
+              <span class="adm-label">Email address</span>
+              <input name="email" type="email" inputmode="email" autocomplete="username" placeholder="you@altistravels.com" required autofocus />
+            </label>
+            <label class="adm-field">
+              <span class="adm-label">Password</span>
+              <span class="lg-pw">
+                <input name="password" type="password" autocomplete="current-password" placeholder="Your password" required />
+                <button class="lg-eye" type="button" aria-label="Show password" aria-pressed="false">
+                  <svg class="eye-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                </button>
+              </span>
+            </label>
+            <button class="adm-btn primary lg-submit" type="submit"><span class="lg-spinner" aria-hidden="true"></span><span class="lg-submit-label">Sign in</span></button>
+          </form>
+          <a class="lg-back" href="/">← Back to the website</a>
+        </div>
+      </section>
     </main>
-    <script src="/js/app.js"></script>
+    <script src="/js/admin-login.js?v=20261024" defer></script>
   </body>
 </html>

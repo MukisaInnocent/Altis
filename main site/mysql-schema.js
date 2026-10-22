@@ -8,7 +8,11 @@ export const TABLES = new Set([
   'gallery',
   'inquiries',
   'media',
-  'sessions'
+  'sessions',
+  'offers',
+  'posts',
+  'opportunities',
+  'faqs'
 ]);
 
 export const SCHEMA_STATEMENTS = [
@@ -102,5 +106,67 @@ export const SCHEMA_STATEMENTS = [
     user_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX sessions_user_id_idx (user_id)
+  )`,
+  `CREATE TABLE IF NOT EXISTS offers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    destination VARCHAR(255),
+    description TEXT,
+    price BIGINT NULL,
+    currency VARCHAR(8) DEFAULT 'UGX',
+    valid_from DATE NULL,
+    valid_until DATE NULL,
+    terms TEXT,
+    image TEXT,
+    package_id INT NULL,
+    published TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(191) NOT NULL UNIQUE,
+    title VARCHAR(255),
+    excerpt TEXT,
+    body LONGTEXT,
+    category VARCHAR(100),
+    tags VARCHAR(255),
+    image TEXT,
+    image_alt VARCHAR(255),
+    author VARCHAR(255),
+    sources TEXT,
+    published TINYINT DEFAULT 0,
+    published_at DATE NULL,
+    reviewed_at DATE NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS opportunities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    kind VARCHAR(32) DEFAULT 'scholarship',
+    title VARCHAR(255),
+    country VARCHAR(255),
+    institution VARCHAR(255),
+    level VARCHAR(100),
+    summary TEXT,
+    eligibility TEXT,
+    documents TEXT,
+    deadline DATE NULL,
+    source_name VARCHAR(255),
+    source_url TEXT,
+    verified_at DATE NULL,
+    published TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS faqs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    question TEXT,
+    answer TEXT,
+    category VARCHAR(50) DEFAULT 'general',
+    sort_order INT DEFAULT 0,
+    published TINYINT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   )`
 ];

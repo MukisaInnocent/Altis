@@ -1,8 +1,10 @@
 import { isMysql } from '../db-config.js';
+import { TABLE_COLUMNS, sanitizeRow } from '../table-columns.js';
 import {
   clearSession as clearSqliteSession,
   countRecords,
   createSession as createSqliteSession,
+  findRecords,
   getAllRecords,
   getRecordById,
   getSessionUser as getSqliteSessionUser,
@@ -71,12 +73,14 @@ export async function clearSession(sessionId) {
 }
 
 export async function insertRow(tableName, row) {
-  if (!isMysql()) return saveJsonTable(tableName, row);
+  const clean = sanitizeRow(tableName, row);
+  if (!isMysql()) return saveJsonTable(tableName, clean);
   const mysql = await loadMysql();
-  return mysql.insertRow(tableName, row);
+  return mysql.insertRow(tableName, clean);
 }
 
 export async function updateRow(tableName, id, row) {
+  row = sanitizeRow(tableName, row);
   if (!isMysql()) {
     updateJsonTable(tableName, id, row);
     return;
@@ -92,6 +96,14 @@ export async function deleteRow(tableName, id) {
   }
   const mysql = await loadMysql();
   await mysql.deleteRow(tableName, id);
+}
+
+// Looks rows up by one whitelisted column, e.g. an enquiry by its public reference.
+export async function findRows(tableName, column, value) {
+  if (!TABLE_COLUMNS[tableName] || !(column in TABLE_COLUMNS[tableName])) throw new Error(`Invalid lookup: ${tableName}.${column}`);
+  if (!isMysql()) return findRecords(tableName, column, value);
+  const mysql = await loadMysql();
+  return mysql.findRows(tableName, column, value);
 }
 
 export async function getRow(tableName, id) {

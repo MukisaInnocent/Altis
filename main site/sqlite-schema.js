@@ -98,6 +98,72 @@ export const SQLITE_SCHEMA = `
     user_id INTEGER NOT NULL,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS offers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    destination TEXT,
+    description TEXT,
+    price INTEGER,
+    currency TEXT DEFAULT 'UGX',
+    valid_from TEXT,
+    valid_until TEXT,
+    terms TEXT,
+    image TEXT,
+    package_id INTEGER,
+    published INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT UNIQUE NOT NULL,
+    title TEXT,
+    excerpt TEXT,
+    body TEXT,
+    category TEXT,
+    tags TEXT,
+    image TEXT,
+    image_alt TEXT,
+    author TEXT,
+    sources TEXT,
+    published INTEGER DEFAULT 0,
+    published_at TEXT,
+    reviewed_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS opportunities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind TEXT DEFAULT 'scholarship',
+    title TEXT,
+    country TEXT,
+    institution TEXT,
+    level TEXT,
+    summary TEXT,
+    eligibility TEXT,
+    documents TEXT,
+    deadline TEXT,
+    source_name TEXT,
+    source_url TEXT,
+    verified_at TEXT,
+    published INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS faqs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    question TEXT,
+    answer TEXT,
+    category TEXT DEFAULT 'general',
+    sort_order INTEGER DEFAULT 0,
+    published INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
 `;
 
 export const SQLITE_TABLES = new Set([
@@ -110,5 +176,9 @@ export const SQLITE_TABLES = new Set([
   'gallery',
   'inquiries',
   'media',
-  'sessions'
+  'sessions',
+  'offers',
+  'posts',
+  'opportunities',
+  'faqs'
 ]);

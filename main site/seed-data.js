@@ -1,3 +1,7 @@
+import { FAQS, POSTS } from './seed-content.js';
+
+export { CONTENT_UPGRADES, SITE_CONTENT } from './seed-content.js';
+
 const IMAGES = {
   gorilla: 'https://images.hostinger.com/c8d9efe2-440c-4c0d-b269-16fd05edb138.png',
   nile: 'https://images.hostinger.com/110ca975-1703-4f2e-8e46-ae84dd12453a.png',
@@ -13,36 +17,6 @@ const IMAGES = {
   beachPhoto: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80',
   cityPhoto: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=80'
 };
-
-export const SITE_CONTENT = [
-  {
-    key: 'hero',
-    value: {
-      title: 'From Uganda to the World',
-      subtitle:
-        'Uganda-based, worldwide in reach. Safaris at home, journeys abroad - planned, booked and supported by people who answer the phone.',
-      ctaPrimary: 'Explore Destinations',
-      ctaSecondary: 'Plan Your Trip',
-      image: 'https://images.hostinger.com/ff8ea400-4b7a-4f87-aabb-574af2bb1041.png'
-    }
-  },
-  {
-    key: 'about',
-    value: {
-      heading: 'Altis Voyage Travel Services Ltd',
-      body: 'Altis Voyage Travel Services Ltd is a professional travel management company based in Kampala, Uganda, providing flight reservations, visa assistance, hotel bookings, holiday packages, travel insurance, airport transfers, and corporate travel solutions.'
-    }
-  },
-  {
-    key: 'contact',
-    value: {
-      phone: '+256 788 748 128 / +256 756 037 524',
-      email: 'info@altistravels.com',
-      address: 'Equatorial Mall, Level 3, Room 342, Bombo Road, Kampala, Uganda',
-      hours: 'Mon-Sat, 8:30-18:00 EAT'
-    }
-  }
-];
 
 export const DESTINATIONS = [
   { name: 'Bwindi Impenetrable Forest', country: 'Uganda', region: 'uganda', tagline: 'Face to face with mountain gorillas', description: 'A classic Ugandan gorilla experience set in misty rainforest and rolling highland trails.', image: IMAGES.bwindiPhoto, price_from: 2900000, featured: 1 },
@@ -92,5 +66,7 @@ export const SEED_TABLES = [
   { table: 'packages', rows: PACKAGES },
   { table: 'services', rows: SERVICES },
   { table: 'testimonials', rows: TESTIMONIALS },
-  { table: 'gallery', rows: GALLERY }
+  { table: 'gallery', rows: GALLERY },
+  { table: 'faqs', rows: FAQS },
+  { table: 'posts', rows: POSTS }
 ];

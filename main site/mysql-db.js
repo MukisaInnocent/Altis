@@ -23,8 +23,16 @@ export async function initializeMysql() {
 export async function listRows(tableName) {
   const pool = await getMysqlPool();
   const table = assertTable(tableName);
-  const [rows] = await pool.query(`SELECT * FROM ${table} ORDER BY created_at DESC`);
+  // site_content has no created_at column; it is listed by key instead.
+  const order = tableName === 'site_content' ? '`key` ASC' : 'created_at DESC';
+  const [rows] = await pool.query(`SELECT * FROM ${table} ORDER BY ${order}`);
   return rows;
+}
+
+export async function insertSiteContentIfMissing(key, value) {
+  const pool = await getMysqlPool();
+  const jsonValue = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  await pool.execute('INSERT IGNORE INTO `site_content` (`key`, value) VALUES (?, ?)', [key, jsonValue]);
 }
 
 export async function getSiteContent(key) {
@@ -78,10 +86,10 @@ export async function createSession(sessionId, userId) {
   );
 }
 
-export async function getSessionUser(sessionId) {
+export async function getSessionUser(sessionId, maxAgeDays = 7) {
   const pool = await getMysqlPool();
   const [rows] = await pool.execute(
-    'SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ?',
+    `SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.created_at >= NOW() - INTERVAL ${Math.trunc(Number(maxAgeDays)) || 7} DAY`,
     [sessionId]
   );
   return rows[0] || null;
@@ -123,6 +131,13 @@ export async function deleteRow(tableName, id) {
   const pool = await getMysqlPool();
   const table = assertTable(tableName);
   await pool.execute(`DELETE FROM ${table} WHERE id = ?`, [id]);
+}
+
+export async function findRows(tableName, column, value) {
+  const pool = await getMysqlPool();
+  const table = assertTable(tableName);
+  const [rows] = await pool.execute(`SELECT * FROM ${table} WHERE \`${column}\` = ? ORDER BY created_at DESC`, [value]);
+  return rows;
 }
 
 export async function getRow(tableName, id) {

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /my-trip
+Disallow: /request-received
+
+Sitemap: https://altistravels.com/sitemap.xml

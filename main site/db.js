@@ -3,6 +3,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { appRoot } from './load-env.js';
 import { SQLITE_SCHEMA, SQLITE_TABLES } from './sqlite-schema.js';
+import { applySqliteMigrations } from './schema-migrations.js';
 
 const require = createRequire(import.meta.url);
 
@@ -28,6 +29,7 @@ export function getDb() {
   const created = new Database(databasePath);
   created.pragma('journal_mode = WAL');
   created.exec(SQLITE_SCHEMA);
+  applySqliteMigrations(created);
 
   database = created;
   console.log(`[db] SQLite ready - ${databasePath}`);
@@ -40,7 +42,13 @@ function assertTable(tableName) {
 }
 
 export function getAllRecords(tableName) {
-  return getDb().prepare(`SELECT * FROM ${assertTable(tableName)} ORDER BY created_at DESC`).all();
+  // site_content has no created_at column; it is listed by key instead.
+  const order = tableName === 'site_content' ? 'key ASC' : 'created_at DESC';
+  return getDb().prepare(`SELECT * FROM ${assertTable(tableName)} ORDER BY ${order}`).all();
+}
+
+export function findRecords(tableName, column, value) {
+  return getDb().prepare(`SELECT * FROM ${assertTable(tableName)} WHERE ${column} = ? ORDER BY created_at DESC`).all(value);
 }
 
 export function getRecordById(tableName, id) {
@@ -58,6 +66,11 @@ export function upsertSiteContent(key, value) {
     VALUES(@key, @value, CURRENT_TIMESTAMP)
     ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=CURRENT_TIMESTAMP
   `).run({ key, value: jsonValue });
+}
+
+export function insertSiteContentIfMissing(key, value) {
+  const jsonValue = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  getDb().prepare('INSERT OR IGNORE INTO site_content(key, value) VALUES(?, ?)').run(key, jsonValue);
 }
 
 export function getSiteContent(key) {
@@ -97,9 +110,11 @@ export function createSession(sessionId, userId) {
   getDb().prepare('INSERT INTO sessions(id, user_id) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET user_id=excluded.user_id, created_at=CURRENT_TIMESTAMP').run(sessionId, userId);
 }
 
-export function getSessionUser(sessionId) {
+export function getSessionUser(sessionId, maxAgeDays = 7) {
   const db = getDb();
-  const session = db.prepare('SELECT user_id FROM sessions WHERE id = ?').get(sessionId);
+  const session = db
+    .prepare(`SELECT user_id FROM sessions WHERE id = ? AND created_at >= datetime('now', ?)`)
+    .get(sessionId, `-${Number(maxAgeDays)} days`);
   if (!session) return null;
   return db.prepare('SELECT * FROM users WHERE id = ?').get(session.user_id);
 }
