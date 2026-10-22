@@ -71,8 +71,8 @@ function footer(site) {
         <p class="footer-copy">A Ugandan travel agency operating worldwide: holiday packages, flights, visa assistance, hotel bookings and study-abroad support.</p>
         <p class="footer-note">We prepare and review every application carefully. Visa, admission and scholarship decisions are made by the relevant authorities and institutions.</p>
       </div>
-      <div>
-        <h2 class="footer-heading">Services</h2>
+      <details class="footer-acc">
+        <summary class="footer-heading">Services</summary>
         <ul>
           <li><a href="/packages">Travel packages</a></li>
           <li><a href="/flights">Flight booking</a></li>
@@ -81,9 +81,9 @@ function footer(site) {
           <li><a href="/offers">Current offers</a></li>
           <li><a href="/trip-planner">Trip planner</a></li>
         </ul>
-      </div>
-      <div>
-        <h2 class="footer-heading">Company</h2>
+      </details>
+      <details class="footer-acc">
+        <summary class="footer-heading">Company</summary>
         <ul>
           <li><a href="/about">About us</a></li>
           <li><a href="/destinations">Destinations</a></li>
@@ -92,7 +92,7 @@ function footer(site) {
           <li><a href="/contact">Contact</a></li>
           <li><a href="/my-trip">Track a request</a></li>
         </ul>
-      </div>
+      </details>
       <div>
         <h2 class="footer-heading">Contact</h2>
         <ul class="footer-contact">

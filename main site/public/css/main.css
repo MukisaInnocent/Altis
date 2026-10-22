@@ -876,3 +876,20 @@ button { cursor: pointer; background: none; }
 
 /* Keep the floating WhatsApp button out of the open menu drawer. */
 body:has(.main-nav.is-open) .whatsapp-float { display: none; }
+
+/* Footer link groups open and close, so the footer stays calm by default. */
+.footer-acc { border-bottom: 1px solid rgba(255, 255, 255, 0.1); align-self: start; }
+.footer-acc summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none;
+  margin: 0; padding: 4px 0 18px; user-select: none;
+}
+.footer-acc summary::-webkit-details-marker { display: none; }
+.footer-acc summary::after {
+  content: ''; width: 9px; height: 9px; flex-shrink: 0; border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+  transform: rotate(45deg) translateY(-2px); transition: transform 0.3s var(--ease);
+}
+.footer-acc[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
+.footer-acc summary:hover { color: var(--accent); }
+.footer-acc summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.footer-acc ul { padding: 2px 0 20px; animation: acc-in 0.35s var(--ease); }
+@keyframes acc-in { from { opacity: 0; transform: translateY(-6px); } }
