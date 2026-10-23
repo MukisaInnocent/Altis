@@ -17,17 +17,17 @@ Set these environment variables in Hostinger before the first start. The reposit
 ```text
 ADMIN_EMAIL=your-admin-email@example.com
 ADMIN_PASSWORD=use-a-long-random-password
-DB_HOST=auth-db657.hstgr.io
+DB_HOST=auth-db1800.hstgr.io
 DB_PORT=3306
-DB_ACCOUNT_PREFIX=u989298385
+DB_ACCOUNT_PREFIX=u531106610
 DB_NAME=Altis
 DB_USER=mukisa
 DB_PASSWORD=your-hostinger-database-password
 ```
 
-Use `DB_HOST=auth-db657.hstgr.io`. The earlier `Access denied` response proved this is the reachable MySQL server. The prefixed database and user names remain required: `u989298385_Altis` and `u989298385_mukisa`.
+Use `DB_HOST=auth-db1800.hstgr.io`. The earlier `Access denied` response proved this is the reachable MySQL server. The prefixed database and user names remain required: `u531106610_Altis` and `u531106610_mukisa`.
 
-The app expands `DB_NAME=Altis` and `DB_USER=mukisa` to Hostinger's prefixed names `u989298385_Altis` and `u989298385_mukisa`. You can also enter the fully prefixed names directly.
+The app expands `DB_NAME=Altis` and `DB_USER=mukisa` to Hostinger's prefixed names `u531106610_Altis` and `u531106610_mukisa`. You can also enter the fully prefixed names directly.
 
 When `DB_HOST` is present, the application uses MySQL, creates the tables automatically, and seeds the database when the destinations table is empty. When `DB_HOST` is absent, it falls back to SQLite for local development. The MySQL application and database should use the same Hostinger account/region. The `uploads/` directory must be writable if media uploads are enabled later.
 
@@ -65,7 +65,7 @@ Startup is additive and safe to repeat. No existing table, column or row is modi
 
 ## Deploying this upgrade safely
 
-1. In hPanel > Databases > phpMyAdmin, export a full backup of `u989298385_Altis`.
+1. In hPanel > Databases > phpMyAdmin, export a full backup of `u531106610_Altis`.
 2. Deploy the code, run `npm run build`, then restart the app.
 3. Check the startup log for `added columns: ...`, then open `/api/health`, `/`, `/packages`, `/flights`, `/sitemap.xml` and the dashboard.
 4. Submit one test enquiry, find it under **Enquiries** in the dashboard, then delete it.
@@ -79,9 +79,11 @@ Startup is additive and safe to repeat. No existing table, column or row is modi
 The site starts but pages are empty and `/api/health` shows `"code":"ER_ACCESS_DENIED_ERROR"`. The database is refusing the sign-in; this is a settings problem, not a code problem. Work through these in order:
 
 1. **Password.** `DB_PASSWORD` must be the password of the database *user* shown in hPanel > Databases (not your Hostinger account password). Reset it there, paste the new one, and use letters and numbers only while testing.
-2. **Names.** The app joins `DB_ACCOUNT_PREFIX` + `_` + `DB_NAME` / `DB_USER`. These must equal the full names hPanel lists (for example `u989298385_Altis` and `u989298385_mukisa`). A new Hostinger account has a different prefix.
+2. **Names.** The app joins `DB_ACCOUNT_PREFIX` + `_` + `DB_NAME` / `DB_USER`. These must equal the full names hPanel lists (for example `u531106610_Altis` and `u531106610_mukisa`). A new Hostinger account has a different prefix.
 3. **User attached.** In hPanel > Databases, the user must be assigned to that database with all privileges.
-4. **Host.** Use the host hPanel shows for this plan. On the same plan, try `DB_HOST=localhost` first. A remote host such as `auth-dbNNN.hstgr.io` belongs to one account's server, and also needs this app's IP allowed under hPanel > Databases > Remote MySQL.
+4. **Host.** `DB_HOST` can list several hosts, tried in order: `DB_HOST=localhost,auth-db1800.hstgr.io`. On the same plan `localhost` is accepted automatically; a remote host such as `auth-db1800.hstgr.io` also needs this app's IP allowed under hPanel > Databases > Remote MySQL.
+
+**Important:** variables set in hPanel > Environment variables override the same names in an uploaded `.env` file. If you set `DB_HOST` (or any DB value) in hPanel, change it there; editing the file will not take effect.
 5. After each change, restart the app and open `/api/health`.
 
 Tip: the error log now prints each problem once a minute instead of once per request. From an SSH terminal in the app folder, `npm run db:check` prints a full report.

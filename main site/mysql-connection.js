@@ -85,6 +85,18 @@ async function connectAndMigrate(config) {
   }
 }
 
+// Connects to one host. A missing database is only created when the server says it does not exist
+// (shared hosting users usually lack the privilege, so other errors are reported as they are).
+async function connectToHost(config) {
+  try {
+    return { ...(await connectAndMigrate(config)), databaseStep: 'existing' };
+  } catch (error) {
+    if (error?.code !== 'ER_BAD_DB_ERROR') throw error;
+    await createDatabaseIfMissing(config);
+    return { ...(await connectAndMigrate(config)), databaseStep: 'created' };
+  }
+}
+
 async function bootstrap() {
   const missing = getMissingMysqlSettings();
   if (missing.length > 0) {
@@ -94,34 +106,39 @@ async function bootstrap() {
   }
 
   const config = getMysqlConfig();
-  let databaseStep = 'existing';
-  let result;
+  // DB_HOST may list several hosts separated by commas, e.g. "localhost,auth-db1800.hstgr.io". They
+  // are tried in order and the first one that works is used. On Hostinger, "localhost" is the
+  // one that is accepted automatically when the app and database share a plan.
+  const hosts = String(config.host).split(',').map((host) => host.trim()).filter(Boolean);
+  let result = null;
+  let usedHost = hosts[0];
+  let lastError = null;
 
-  try {
-    result = await connectAndMigrate(config);
-  } catch (error) {
-    // Creating a database needs privileges that shared hosting users do not have, so it is only
-    // attempted when the server says the database does not exist. Any other error (wrong password,
-    // blocked host) is reported as it is.
-    if (error?.code !== 'ER_BAD_DB_ERROR') throw error;
-    await createDatabaseIfMissing(config);
-    databaseStep = 'created';
-    result = await connectAndMigrate(config);
+  for (const host of hosts) {
+    try {
+      result = await connectToHost({ ...config, host });
+      usedHost = host;
+      break;
+    } catch (error) {
+      lastError = error;
+      if (hosts.length > 1) console.warn(`[db] Host "${host}" failed (${error?.code || 'error'}).${host === hosts[hosts.length - 1] ? '' : ' Trying the next one.'}`);
+    }
   }
+  if (!result) throw lastError;
 
-  const { created, migratedColumns } = result;
+  const { created, migratedColumns, databaseStep } = result;
   pool = created;
   lastBootstrapReport = {
     database: config.database,
     user: config.user,
-    host: config.host,
+    host: usedHost,
     databaseStep,
     tables: SCHEMA_STATEMENTS.length,
     migratedColumns
   };
 
   console.log(
-    `[db] MySQL ready - host=${config.host} database=${config.database} user=${config.user} tables=${SCHEMA_STATEMENTS.length} (${databaseStep})${migratedColumns.length ? ` added columns: ${migratedColumns.join(', ')}` : ''}`
+    `[db] MySQL ready - host=${usedHost} database=${config.database} user=${config.user} tables=${SCHEMA_STATEMENTS.length} (${databaseStep})${migratedColumns.length ? ` added columns: ${migratedColumns.join(', ')}` : ''}`
   );
 
   return created;

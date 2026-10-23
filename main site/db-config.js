@@ -1,7 +1,7 @@
 import { describeEnvSources, loadEnvironment } from './load-env.js';
 
-const DEFAULT_ACCOUNT_PREFIX = 'u989298385';
-const DEFAULT_DB_HOST = 'auth-db657.hstgr.io';
+const DEFAULT_ACCOUNT_PREFIX = 'u531106610';
+const DEFAULT_DB_HOST = 'localhost,auth-db1800.hstgr.io';
 const DEFAULT_DB_PORT = 3306;
 const DEFAULT_DB_NAME = 'Altis';
 const DEFAULT_DB_USER = 'mukisa';
