@@ -18,6 +18,7 @@ import {
   updateRow
 } from '../../src/data-access.js';
 import { ValidationError, buildInquiry, clientIp, createReference, matchesContact, publicStatus, rateLimit } from '../../src/enquiries.js';
+import { logThrottled } from '../../src/log-throttle.js';
 import { slugify } from '../../src/site/html.js';
 import {
   invalidateSiteCache,
@@ -227,14 +228,20 @@ export default async function handler(req, res) {
       const status = await getDatabaseStatus();
       // Connection details are only for signed-in staff; the public sees whether the site is up.
       const detailed = status.ok ? await isAdmin(req).catch(() => false) : false;
-      const body = detailed ? status : { ok: status.ok, driver: status.driver, counts: status.counts };
+      // Signed-out visitors get the error code and advice (never the user name, host or message),
+      // so a broken database can be diagnosed even when nobody can sign in.
+      const body = detailed
+        ? status
+        : status.ok
+          ? { ok: true, driver: status.driver, counts: status.counts }
+          : { ok: false, driver: status.driver, error: { code: status.error.code, hint: status.error.hint } };
       return res.status(status.ok ? 200 : 503).json(body);
     }
 
     // Guarantees the database, its tables and the seed rows exist before any query runs. Pages
     // still render if it fails, so visitors see the site rather than an error.
     if (resource === 'render' || resource === 'sitemap') {
-      await ensureDatabaseReady().catch((error) => console.error(`[site] Database not ready: ${describeMysqlError(error).message}`));
+      await ensureDatabaseReady().catch((error) => logThrottled('db-not-ready', `[site] Database not ready: ${describeMysqlError(error).message}`));
       return resource === 'sitemap' ? await renderSitemap(req, res) : await renderPage(req, res, segments.slice(1));
     }
 
@@ -265,8 +272,8 @@ export default async function handler(req, res) {
     const described = describeMysqlError(error);
     const driver = isMysql() ? 'mysql' : 'sqlite';
 
-    console.error(`[api] ${driver} error on /api/${segments.join('/')} (${described.code}): ${described.message}`);
-    if (described.hint) console.error(`[api] Hint: ${described.hint}`);
+    logThrottled(`api-${described.code}`, `[api] ${driver} error on /api/${segments.join('/')} (${described.code}): ${described.message}${described.hint ? `
+[api] Hint: ${described.hint}` : ''}`);
 
     // Diagnostic details are logged and shown to signed-in staff only.
     const detailed = await isAdmin(req).catch(() => false);

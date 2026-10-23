@@ -8,7 +8,7 @@ const CONNECTION_LIMIT = 5;
 
 const ERROR_HINTS = {
   ER_ACCESS_DENIED_ERROR:
-    'Check DB_USER and DB_PASSWORD in the Hostinger environment variables, and make sure the database user is attached to the database in hPanel.',
+    'The database rejected the sign-in. Check in this order: (1) DB_PASSWORD is the password of the database USER (not your Hostinger account password) and was pasted exactly; (2) the user name shown in hPanel > Databases is DB_ACCOUNT_PREFIX + "_" + DB_USER; (3) that user is assigned to this database; (4) DB_HOST is the host hPanel shows for this plan. On the same plan try DB_HOST=localhost; a remote host such as auth-dbNNN.hstgr.io also needs the IP of this app allowed under hPanel > Databases > Remote MySQL.',
   ER_DBACCESS_DENIED_ERROR:
     'The database user exists but has no access to this database. Open hPanel > Databases and attach the user to the database.',
   ER_BAD_DB_ERROR:
@@ -74,6 +74,17 @@ async function createDatabaseIfMissing(config) {
   }
 }
 
+async function connectAndMigrate(config) {
+  const created = createPool(config);
+  try {
+    await Promise.all(SCHEMA_STATEMENTS.map((statement) => created.query(statement)));
+    return { created, migratedColumns: await applyMysqlMigrations(created) };
+  } catch (error) {
+    await created.end().catch(() => {});
+    throw error;
+  }
+}
+
 async function bootstrap() {
   const missing = getMissingMysqlSettings();
   if (missing.length > 0) {
@@ -83,29 +94,22 @@ async function bootstrap() {
   }
 
   const config = getMysqlConfig();
-  let databaseStep = 'skipped';
+  let databaseStep = 'existing';
+  let result;
 
   try {
-    databaseStep = await createDatabaseIfMissing(config);
+    result = await connectAndMigrate(config);
   } catch (error) {
-    const described = describeMysqlError(error);
-    console.warn(
-      `[db] Could not create database "${config.database}" (${described.code}). Continuing in case it already exists. ${described.hint || ''}`
-    );
-    databaseStep = `failed:${described.code}`;
+    // Creating a database needs privileges that shared hosting users do not have, so it is only
+    // attempted when the server says the database does not exist. Any other error (wrong password,
+    // blocked host) is reported as it is.
+    if (error?.code !== 'ER_BAD_DB_ERROR') throw error;
+    await createDatabaseIfMissing(config);
+    databaseStep = 'created';
+    result = await connectAndMigrate(config);
   }
 
-  const created = createPool(config);
-
-  let migratedColumns = [];
-  try {
-    await Promise.all(SCHEMA_STATEMENTS.map((statement) => created.query(statement)));
-    migratedColumns = await applyMysqlMigrations(created);
-  } catch (error) {
-    await created.end().catch(() => {});
-    throw error;
-  }
-
+  const { created, migratedColumns } = result;
   pool = created;
   lastBootstrapReport = {
     database: config.database,
@@ -123,13 +127,25 @@ async function bootstrap() {
   return created;
 }
 
+// After a failed start, further attempts within this window fail immediately with the same error,
+// so a broken password does not trigger a new connection (and a new log line) for every request.
+const FAILURE_BACKOFF_MS = 30000;
+let lastFailure = null;
+
 export async function ensureMysqlReady() {
   if (pool) return pool;
+  if (lastFailure && Date.now() - lastFailure.at < FAILURE_BACKOFF_MS) throw lastFailure.error;
   if (!readyPromise) {
-    readyPromise = bootstrap().catch((error) => {
-      readyPromise = null;
-      throw error;
-    });
+    readyPromise = bootstrap()
+      .then((created) => {
+        lastFailure = null;
+        return created;
+      })
+      .catch((error) => {
+        readyPromise = null;
+        lastFailure = { error, at: Date.now() };
+        throw error;
+      });
   }
   return readyPromise;
 }

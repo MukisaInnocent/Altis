@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { getRow, listRows, listSiteContent } from '../data-access.js';
+import { logThrottled } from '../log-throttle.js';
 import { escapeHtml, isoDate, todayIso } from './html.js';
 import { layout } from './layout.js';
 import { NotFound, PAGES, Redirect, SITEMAP_PATHS, article, notFound, packageDetail } from './pages.js';
@@ -56,7 +57,7 @@ async function safeList(table) {
     return await cached(table, () => listRows(table));
   } catch (error) {
     // Pages still render (with empty sections) when the database is briefly unavailable.
-    console.error(`[site] Could not load ${table}: ${error.message}`);
+    logThrottled('site-data', `[site] Could not load site data (${table} and others): ${error.message}`);
     return [];
   }
 }
@@ -68,7 +69,7 @@ async function loadContent() {
       return Object.fromEntries(rows.filter((row) => !String(row.key).startsWith('_')).map((row) => [row.key, parseValue(row.value)]));
     });
   } catch (error) {
-    console.error(`[site] Could not load site content: ${error.message}`);
+    logThrottled('site-data', `[site] Could not load site content: ${error.message}`);
     return {};
   }
 }

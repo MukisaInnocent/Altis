@@ -74,3 +74,14 @@ Startup is additive and safe to repeat. No existing table, column or row is modi
 
 1. Redeploy the previous commit (`cbd6afb`) and restart. The old code ignores the new tables and columns, so it runs against the upgraded database unchanged. Note that the old code rewrites the `hero`, `about` and `contact` site content on every start, so the old contact numbers return until the upgrade is redeployed.
 2. Restore the database backup only if data was damaged; the upgrade itself does not change existing rows apart from the two content upgrades above, which can be re-edited in the dashboard.
+## Troubleshooting: "Access denied for user …"
+
+The site starts but pages are empty and `/api/health` shows `"code":"ER_ACCESS_DENIED_ERROR"`. The database is refusing the sign-in; this is a settings problem, not a code problem. Work through these in order:
+
+1. **Password.** `DB_PASSWORD` must be the password of the database *user* shown in hPanel > Databases (not your Hostinger account password). Reset it there, paste the new one, and use letters and numbers only while testing.
+2. **Names.** The app joins `DB_ACCOUNT_PREFIX` + `_` + `DB_NAME` / `DB_USER`. These must equal the full names hPanel lists (for example `u989298385_Altis` and `u989298385_mukisa`). A new Hostinger account has a different prefix.
+3. **User attached.** In hPanel > Databases, the user must be assigned to that database with all privileges.
+4. **Host.** Use the host hPanel shows for this plan. On the same plan, try `DB_HOST=localhost` first. A remote host such as `auth-dbNNN.hstgr.io` belongs to one account's server, and also needs this app's IP allowed under hPanel > Databases > Remote MySQL.
+5. After each change, restart the app and open `/api/health`.
+
+Tip: the error log now prints each problem once a minute instead of once per request. From an SSH terminal in the app folder, `npm run db:check` prints a full report.
