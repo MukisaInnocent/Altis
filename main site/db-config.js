@@ -1,4 +1,4 @@
-import { describeEnvSources, loadEnvironment } from './load-env.js';
+import { describeEnvSources, isFromEnvFile, loadEnvironment } from './load-env.js';
 
 const DEFAULT_ACCOUNT_PREFIX = 'u531106610';
 const DEFAULT_DB_HOST = 'localhost,auth-db1800.hstgr.io';
@@ -92,5 +92,24 @@ export function describeDatabaseTarget() {
     database: config.database,
     passwordConfigured: config.password.length > 0,
     envSources: sources
+  };
+}
+
+// Describes the database sign-in details for the log without revealing the password: its length,
+// whether it has stray outer spaces, and which special characters it contains.
+export function describeCredentialCheck() {
+  loadEnvironment();
+  const config = getMysqlConfig();
+  const rawPassword = process.env.DB_PASSWORD ?? '';
+  const special = [...new Set(rawPassword.match(/[#$"'`\ ]/g) || [])].map((char) => (char === ' ' ? 'space' : char));
+  return {
+    user: config.user,
+    database: config.database,
+    hosts: config.host,
+    passwordLength: config.password.length,
+    passwordHasOuterSpaces: rawPassword !== rawPassword.trim(),
+    passwordSpecialChars: special,
+    passwordSource: isFromEnvFile('DB_PASSWORD') ? 'the uploaded .env file' : 'a hosting environment variable',
+    hostSource: isFromEnvFile('DB_HOST') ? 'the uploaded .env file' : process.env.DB_HOST ? 'a hosting environment variable' : 'the built-in default'
   };
 }

@@ -84,6 +84,9 @@ The site starts but pages are empty and `/api/health` shows `"code":"ER_ACCESS_D
 4. **Host.** `DB_HOST` can list several hosts, tried in order: `DB_HOST=localhost,auth-db1800.hstgr.io`. On the same plan `localhost` is accepted automatically; a remote host such as `auth-db1800.hstgr.io` also needs this app's IP allowed under hPanel > Databases > Remote MySQL.
 
 **Important:** variables set in hPanel > Environment variables override the same names in an uploaded `.env` file. If you set `DB_HOST` (or any DB value) in hPanel, change it there; editing the file will not take effect.
-5. After each change, restart the app and open `/api/health`.
+5. **Remote MySQL.** In hPanel > Databases > Remote MySQL, pick the database and allow `%` (any host). Node apps get a new network address each time they restart, so a single allowed IP stops working. Protect the database with a strong password instead.
+6. After each change, restart the app and open `/api/health`.
+
+The startup log prints a line starting `[db] Sign-in details used` that shows the user, database and host the app used, and the password's length and special characters (never the password). Compare the length with the password you set: if they differ, the hosting panel saved something other than what you typed, often because of a special character or a stray space.
 
 Tip: the error log now prints each problem once a minute instead of once per request. From an SSH terminal in the app folder, `npm run db:check` prints a full report.

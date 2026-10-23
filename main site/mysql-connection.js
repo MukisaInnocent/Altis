@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
-import { getMissingMysqlSettings, getMysqlConfig } from './db-config.js';
+import { describeCredentialCheck, getMissingMysqlSettings, getMysqlConfig } from './db-config.js';
+import { logThrottled } from './src/log-throttle.js';
 import { SCHEMA_STATEMENTS } from './mysql-schema.js';
 import { applyMysqlMigrations } from './schema-migrations.js';
 
@@ -8,7 +9,7 @@ const CONNECTION_LIMIT = 5;
 
 const ERROR_HINTS = {
   ER_ACCESS_DENIED_ERROR:
-    'The database rejected the sign-in. Check in this order: (1) DB_PASSWORD is the password of the database USER (not your Hostinger account password) and was pasted exactly; (2) the user name shown in hPanel > Databases is DB_ACCOUNT_PREFIX + "_" + DB_USER; (3) that user is assigned to this database; (4) DB_HOST is the host hPanel shows for this plan. On the same plan try DB_HOST=localhost; a remote host such as auth-dbNNN.hstgr.io also needs the IP of this app allowed under hPanel > Databases > Remote MySQL.',
+    'The database rejected the sign-in, and MySQL gives this same message for a wrong password, a user that does not exist, and a connecting address that is not allowed. Check: (1) the user name in hPanel > Databases matches DB_ACCOUNT_PREFIX + "_" + DB_USER; (2) DB_PASSWORD is the password of that database user, typed exactly; (3) the user is assigned to the database; (4) hPanel > Databases > Remote MySQL allows this app to connect. Node apps change address when they restart, so choose "any host" (%) for this database and rely on a strong password.',
   ER_DBACCESS_DENIED_ERROR:
     'The database user exists but has no access to this database. Open hPanel > Databases and attach the user to the database.',
   ER_BAD_DB_ERROR:
@@ -124,7 +125,13 @@ async function bootstrap() {
       if (hosts.length > 1) console.warn(`[db] Host "${host}" failed (${error?.code || 'error'}).${host === hosts[hosts.length - 1] ? '' : ' Trying the next one.'}`);
     }
   }
-  if (!result) throw lastError;
+  if (!result) {
+    if (lastError?.code === 'ER_ACCESS_DENIED_ERROR') {
+      const c = describeCredentialCheck();
+      logThrottled('db-credentials', `[db] Sign-in details used -> user: ${c.user} | database: ${c.database} | host(s): ${c.hosts} (from ${c.hostSource}) | password: ${c.passwordLength} characters, from ${c.passwordSource}, outer spaces: ${c.passwordHasOuterSpaces ? 'YES (remove them)' : 'no'}, special characters: ${c.passwordSpecialChars.length ? c.passwordSpecialChars.join(' ') : 'none'}. If the length is not the length of the password you set, the saved value differs from what you typed.`, 10 * 60 * 1000);
+    }
+    throw lastError;
+  }
 
   const { created, migratedColumns, databaseStep } = result;
   pool = created;

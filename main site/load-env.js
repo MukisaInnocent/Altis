@@ -8,6 +8,7 @@ export const repoRoot = path.resolve(appRoot, '..');
 const MAX_ENV_FILE_BYTES = 64 * 1024;
 const loadedSources = [];
 const staleKeys = new Set();
+const keysFromFile = new Set();
 
 const ENV_KEY_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const LEGACY_CREDENTIAL_FILE_PATTERN = /^(DB_|MYSQL_|ADMIN_|NODE_ENV)/;
@@ -55,6 +56,7 @@ function applyEnvValues(values, sourceLabel) {
       continue;
     }
     process.env[key] = value;
+    keysFromFile.add(key);
     applied += 1;
   }
 
@@ -128,6 +130,11 @@ export function loadEnvironment({ extraFiles = [] } = {}) {
 
 export function describeEnvSources() {
   return [...loadedSources];
+}
+
+// True when the value was read from an uploaded .env file rather than set in the hosting panel.
+export function isFromEnvFile(key) {
+  return keysFromFile.has(key);
 }
 
 export function describeStaleKeys() {
